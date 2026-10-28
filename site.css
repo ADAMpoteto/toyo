@@ -442,3 +442,106 @@ img{display:block;max-width:100%;}
 @media(max-width:640px){ .t-chip:not(.big) b{font-size:23px;} .t-chip:not(.big) b small{font-size:12px;margin:0 2px 0 1px;} }
 .t-dr-t{color:var(--ink) !important;filter:none !important;display:flex;align-items:center;gap:6px;}
 .t-dr-t::before{content:"";width:10px;height:10px;background:var(--tc);border-radius:2px;}
+
+/* =====================================================================
+   UIの統一：どのページも「紺の見出し線＋金のアクセント＋角ばった白いパネル」
+   ===================================================================== */
+:root{ --es:var(--navy3); --es-light:#fbf5e4; --es-gold:#8a6414; --es-gold-bg:#f8edcc; --r:0px; --rl:0px; }
+/* SEASON 上部（タイル） */
+#es-hero.hero{background:none;padding:0;border:0;margin-bottom:44px;}
+.t-chips6{grid-template-columns:2fr 1fr 1fr 1fr;}
+.t-chips6 .t-chip.big{grid-row:span 2;display:flex;flex-direction:column;justify-content:center;}
+.t-chip.gold{background:var(--sky-l);} .t-chip.gold b{color:var(--sky-d);}
+@media(max-width:760px){ .t-chips6{grid-template-columns:repeat(3,minmax(0,1fr));} .t-chips6 .t-chip.big{grid-row:auto;} }
+/* タブ・プルダウン：四角いピルにそろえる */
+.day-tabs{gap:6px;}
+.day-tab{border-radius:0;border:1px solid var(--line);background:#fff;color:var(--ink2);font-size:12px;font-weight:700;padding:7px 14px;}
+.day-tab:hover{background:var(--bg2);color:var(--ink);}
+.day-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.trip-selbox select{appearance:none;-webkit-appearance:none;border:1px solid var(--line);border-radius:0;font-size:14px;font-weight:700;padding:10px 40px 10px 14px;background-color:#fff;}
+/* ランキングの分類（総合・打撃・投手・能力）は下線つきのタブ */
+.es-rk-grp{border:0;border-bottom:2px solid var(--navy);border-radius:0;margin-bottom:14px;}
+.es-rk-g{flex:0 0 auto;padding:10px 20px 8px;font-size:14px;font-weight:900;background:none;color:var(--ink2);}
+.es-rk-g+.es-rk-g{border-left:0;}
+.es-rk-g.active{background:var(--navy);color:#fff;}
+/* 小さい数字のチップ（勝敗・得点など） */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:22px;}
+.stat-chip{border:0;border-radius:0;background:#fff;padding:10px 14px;font-size:12px;font-weight:700;color:var(--ink2);}
+.stat-chip strong{font-family:var(--en);font-weight:800;font-size:24px;color:var(--navy);margin:0 2px;}
+/* 年度別成績の表 */
+.es-tbl-wrap{border:0;border-radius:0;border-top:2px solid var(--navy);}
+.es-tbl thead th{background:var(--navy);color:#fff;font-size:11px;padding:9px 6px;}
+.es-tbl th,.es-tbl td{border-bottom:1px solid var(--line);}
+.es-tbl tbody tr.on td,.es-tbl tbody tr.on th{background:var(--es-light);box-shadow:none;}
+.es-tbl tbody tr.on th{box-shadow:inset 4px 0 0 var(--gold);}
+.es-y{font-family:var(--en);font-weight:800;font-style:italic;font-size:18px;}
+/* 結果ラベル（優勝・準優勝・ベスト4…） */
+.es-res{border-radius:0;font-weight:800;padding:2px 8px;background:var(--bg2);color:var(--ink2);box-shadow:none;}
+.es-res.v{background:var(--gold);color:var(--navy);box-shadow:none;}
+.es-res.s{background:var(--navy3);color:#fff;}
+.es-res.b4{background:#dfe5f1;color:var(--navy);}
+.es-res.live{background:#fff;color:var(--lose);box-shadow:inset 0 0 0 1px var(--lose);}
+/* 大会ごとの折りたたみ（見出しは紺の太線） */
+.es-tk{border-bottom:0;margin-bottom:10px;}
+.es-tk > summary{background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);padding:12px 14px;font-size:15px;font-weight:900;}
+.es-tk[open] > summary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.es-tk[open] > summary .es-tk-wl{color:rgba(255,255,255,.75);}
+.es-tk[open] > summary::after{color:var(--gold-l);}
+.es-tk-body{padding:4px 0 14px;}
+/* 試合の行 */
+.es-game{border-bottom:1px solid var(--line);}
+.es-game > summary,.es-game:not(details){padding:12px 6px;}
+.es-rd{color:var(--navy);font-weight:800;}
+.es-opp-name{font-size:15px;}
+.es-score{font-family:var(--en);font-size:22px;}
+.es-wlb{font-family:"Noto Sans JP",sans-serif;border-radius:0;width:22px;height:22px;}
+.es-score.w .es-wlb{background:var(--navy3);}
+.es-score.l .es-wlb{background:var(--lose);}
+/* MVP */
+.es-mvp{background:var(--sky-l);border-radius:0;border-left:4px solid var(--gold);padding:10px 14px;}
+.es-mvp-b{border-radius:0;background:var(--navy);color:var(--gold-l);}
+/* スコアボード（紺） */
+.es-ls{background:var(--navy);color:#fff;border-radius:0;}
+.es-ls thead th{color:rgba(255,255,255,.6);}
+.es-ls tr.me th,.es-ls tr.me td{color:var(--gold-l);}
+.es-ls .es-ls-r{border-left:1px solid rgba(255,255,255,.25);}
+/* ボックススコア・選手の表 */
+.es-box-tbl thead th,.es-box-tbl thead .es-bx-no,.es-box-tbl thead th:nth-child(2){background:var(--bg2);color:var(--ink2);}
+.es-box-tbl tr.tot th,.es-box-tbl tr.tot td{border-top:2px solid var(--navy);}
+.es-st-wrap{border-radius:0;}
+.es-st-tbl{border-radius:0;}
+.es-st-tbl tr.cur th,.es-st-tbl tr.cur td{background:var(--es-light);}
+/* 戦力別の表 */
+.es-pw-tbl thead th,.es-rank-tbl thead th{background:var(--navy);color:#fff;padding:8px 6px;}
+.es-pw-tbl td,.es-pw-tbl th{padding:9px 6px;border-bottom:1px solid var(--line);}
+.es-pw{border-radius:0;}
+/* 選手の行（名鑑・ランキング・ベスト9・スタメン） */
+.es-pl,.es-lu-row{border-bottom:1px solid var(--line);}
+.es-pl > summary:hover,.es-lu-row > summary:hover{background:var(--bg2);}
+.es-pl[open] > summary,.es-lu-row[open] > summary{background:var(--es-light);box-shadow:inset 4px 0 0 var(--gold);}
+.gm-row{padding:12px 6px;}
+.gm-title{font-size:15px;font-weight:800;}
+.gm-score,.es-val{font-family:var(--en);font-weight:800;font-style:italic;font-size:24px;color:var(--navy);}
+.es-val small{font-family:"Noto Sans JP",sans-serif;font-style:normal;}
+.gm-pos{font-family:var(--en);font-weight:800;font-style:italic;font-size:20px;color:var(--ink3);}
+.es-lu-no{font-family:var(--en);font-weight:800;font-style:italic;font-size:20px;color:var(--navy);}
+.es-b9-row{padding:12px 6px;}
+.es-b9-name{font-size:16px;}
+.es-b9-val b{font-family:var(--en);font-style:italic;font-size:26px;color:var(--navy);}
+.es-bench-lbl{font-size:13px;font-weight:900;color:var(--navy);margin:18px 0 4px;padding-left:10px;border-left:4px solid var(--gold);}
+/* もっと見る */
+.es-more > summary{font-family:var(--en);font-size:14px;letter-spacing:.08em;color:var(--navy);border:1px solid var(--line);margin-top:8px;}
+.es-more > summary:hover{background:var(--navy);color:#fff;}
+/* チームの記録（カード） */
+.es-recs{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.es-rec{border:1px solid var(--line);border-left:5px solid var(--navy3);border-radius:0;padding:14px 16px;background:#fff;}
+.es-rec-t{font-size:12px;color:var(--ink2);}
+.es-rec-v{font-family:var(--en);font-weight:800;font-style:italic;font-size:36px;color:var(--navy);letter-spacing:0;}
+.es-rec-v small{font-family:"Noto Sans JP",sans-serif;font-style:normal;}
+/* タグ */
+.es-tag{border-radius:0;}
+.kk-note-s{color:var(--ink3);}
+.t-chips6{grid-template-columns:2fr repeat(3,1fr);}
+.stats-row{grid-template-columns:repeat(3,minmax(0,1fr));}
+@media(max-width:640px){ .stat-chip{padding:8px 10px;} .stat-chip strong{font-size:20px;} }
+@media(max-width:760px){ .t-chips6{grid-template-columns:repeat(3,minmax(0,1fr));} .t-chips6 .t-chip.big{grid-column:1/-1;grid-row:auto;} }

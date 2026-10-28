@@ -269,16 +269,14 @@ function esRenderHero(){
   const st=esStreaks(), pro=ES.grads.filter(g=>g.pro).length;
   const rs=G.reduce((a,g)=>a+g.rs,0), ra=G.reduce((a,g)=>a+g.ra,0);
   document.getElementById("es-hero").innerHTML=`
-    <div class="tm-hero-label">${escHtml(ES_SCHOOL)}　通算成績</div>
-    <div class="tm-big es-big">${nf(w)}<small>勝</small>${nf(l)}<small>敗</small>${d?`${d}<small>分</small>`:""}</div>
-    <div class="gm-hero-sub">${G.length}試合・勝率 ${w+l?esAvgFmt(w/(w+l)):"-"}・総得点 ${nf(rs)}／総失点 ${nf(ra)}</div>
-    <div class="hero-meta">
-      <span class="hero-chip es-gold">夏の甲子園優勝 <strong>${cnt("夏の甲子園")}</strong> 回</span>
-      <span class="hero-chip es-gold">春の甲子園優勝 <strong>${cnt("春の甲子園")}</strong> 回</span>
-      <span class="hero-chip">神宮大会優勝 <strong>${cnt("神宮大会")}</strong> 回</span>
-      <span class="hero-chip accent">最長 <strong>${st.best.n}</strong> 連勝</span>
-      ${st.cur>1?`<span class="hero-chip">現在 <strong>${st.cur}</strong> 連勝中</span>`:""}
-      ${pro?`<span class="hero-chip">プロ入り <strong>${pro}</strong> 人</span>`:""}
+    <div class="t-chips t-chips6">
+      <div class="t-chip big"><span>${escHtml(ES_SCHOOL)} 通算成績</span><b>${nf(w)}<small>勝</small>${nf(l)}<small>敗</small>${d?`${d}<small>分</small>`:""}</b><em>${G.length}試合・勝率 ${w+l?esAvgFmt(w/(w+l)):"-"}・得点 ${nf(rs)}／失点 ${nf(ra)}</em></div>
+      <div class="t-chip gold"><span>夏の甲子園優勝</span><b>${cnt("夏の甲子園")}<small>回</small></b></div>
+      <div class="t-chip gold"><span>春の甲子園優勝</span><b>${cnt("春の甲子園")}<small>回</small></b></div>
+      <div class="t-chip"><span>甲子園出場</span><b>${ES.years.reduce((a,Y)=>a+["夏の甲子園","春の甲子園"].filter(k=>Y.games.some(g=>g.taikai===k)).length,0)}<small>回</small></b></div>
+      <div class="t-chip"><span>神宮大会優勝</span><b>${cnt("神宮大会")}<small>回</small></b></div>
+      <div class="t-chip"><span>最長連勝</span><b>${st.best.n}<small>連勝</small></b></div>
+      <div class="t-chip"><span>プロ入り</span><b>${pro}<small>人</small></b></div>
     </div>`;
 }
 
