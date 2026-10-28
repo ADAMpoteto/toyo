@@ -781,3 +781,5 @@ img{display:block;max-width:100%;}
   .pc-tab{font-size:10px;letter-spacing:-.04em;}
   .es-box-tbl .es-pos.sm{display:none;}
 }
+/* プロフィールは1列（上から順に、誕生日が一番下） */
+.pc-prof{grid-template-columns:minmax(0,1fr);max-width:560px;}

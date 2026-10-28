@@ -703,22 +703,31 @@ const ES_RANK_P = ["対ピンチ","対左打者","打たれ強さ","ケガしに
 const ES_RANK_F = ["チャンス","対左投手","キャッチャー","ケガしにくさ","盗塁","走塁","送球","回復"];
 const ES_RANK_SK = [...new Set([...ES_RANK_F, ...ES_RANK_P])];
 /* 「特能」セルの赤特（よくあるもの）。ここにない赤特は先頭に▼か末尾に×を付ければ赤になる */
-const ES_RED_SK = /^(四球|寸前|一発|乱調|負け運|軽い球|短気|抜け球|シュート回転|スロースターター|三振|併殺|エラー|扇風機|チャンス×|ムード×|ムード✕|ケガしやすい|鈍足|調子不安定|ムラッ気|ノミの心臓|ランナー×|送球×|守備職人×|対ストレート×|対変化球×|初球×|三振男|悪球打ち|退場癖|拙攻|打球反応×|ピンチ×|内角×|外角×|チキン|ガラスのハート|国際大会[×✕]|対ランナー[×✕]?|悲劇のエース|ボール先行|雑草魂[FG]|平成の怪物[FG])$/;
-/* 緑特（パワプロの個性系の特能） */
-const ES_GREEN_SK = /^(調子安定|調子極端|速球中心|変化球中心|投球位置左|投球位置右|テンポ[◯○〇]|野手調子安定|野手調子極端|人気者|強振多用|ミート多用|積極打法|慎重打法|積極走塁|慎重走塁|積極守備|チームプレイ[◯○〇×✕]|選球眼|積極盗塁|慎重盗塁|スーパーカートリオ|ブンブン丸)$/;
-/* 金特（★を付けなくても金色にする） */
-const ES_GOLD_SK = /^(威圧感|ギアチェンジ|内角無双|ド根性|引っ張り屋|トリックスター|バズーカ送球|エースキラー|ロケットスタート|低球必打|高球必打|内角必打|外角必打|怪童|怪物球威|ガソリンタンク|驚異の切れ味|強心臓|精密機械|走者釘付|鉄腕|ドクターK|不屈の魂|変幻自在|本塁打厳禁|アーチスト|安打製造機|一球入魂|気迫ヘッド|球界の頭脳|恐怖の満塁男|切り込み隊長|芸術的流し打ち|高速ベースラン|高速レーザー|ささやき戦術|重戦車|勝負師|ストライク送球|代打の神様|鉄の壁|電光石火|伝説のサヨナラ男|左キラー|魔術師|鉄人|広角砲|メッタ打ち|精神的支柱|終盤力|火事場の馬鹿力|大番狂わせ|勝利の星|左腕キラー|主砲キラー|ハイスピンジャイロ|逆襲|ヒートアップ|渾身の決勝打|ディレイドアーム|完全燃焼|闘魂|トップギア|クロスキャノン|暴れ球|神の子|ケンカ投法|牛若丸|忍者|怪物|弾丸ライナー|ミスターゼロ|奪三振王|球速安定|変化球マスター|ハイスピンジャイロ|ノビノビ|超尻上がり|内野安打王|ハイパーキャッチ|ストライク送球|球界の盾)$/;
+/* 特能の色分け（パワプロ公式の一覧どおり。リストにないものは青特）
+   出典：Game8「パワプロ2026-2027 特殊能力一覧」の金特・赤特・緑特一覧 */
+const esSkNorm = x => String(x||"").trim().replace(/[×✕]/g,"✕").replace(/[○〇◯]/g,"◯").replace(/[Ａ-Ｇ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+const ES_GOLD_SET  = new Set(["威圧感", "ギアチェンジ", "内角無双", "ド根性", "引っ張り屋", "トリックスター", "バズーカ送球", "エースキラー", "ロケットスタート", "低球必打", "高球必打", "内角必打", "怪童", "怪物球威", "ガソリンタンク", "驚異の切れ味", "強心臓", "精密機械", "走者釘付", "鉄腕", "ドクターK", "不屈の魂", "変幻自在", "本塁打厳禁", "アーチスト", "安打製造機", "一球入魂", "気迫ヘッド", "球界の頭脳", "恐怖の満塁男", "切り込み隊長", "芸術的流し打ち", "高速ベースラン", "高速レーザー", "ささやき戦術", "重戦車", "勝負師", "ストライク送球", "代打の神様", "鉄の壁", "電光石火", "伝説のサヨナラ男", "左キラー", "魔術師", "鉄人", "広角砲", "メッタ打ち", "精神的支柱", "終盤力", "火事場の馬鹿力", "大番狂わせ", "外角必打", "勝利の星", "左腕キラー", "主砲キラー", "ハイスピンジャイロ", "逆襲", "ヒートアップ", "渾身の決勝打", "ディレイドアーム", "完全燃焼", "超投打躍動", "闘魂", "トップギア", "クロスキャノン", "暴れ球", "神の子", "世界の代打王", "世界の盗塁王", "ケンカ投法", "牛若丸", "忍者", "世界の王", "打撃の神様", "小坂ゾーン", "草魂", "火の玉ストレート", "怪物", "世界の代打男", "レッドスター", "ゴジラ", "SHO-TIME", "ID野球の申し子", "Big Fly"]);
+const ES_RED_SET   = new Set(["エラー", "三振", "併殺", "扇風機", "ムード✕", "一発", "ガラスのハート", "軽い球", "シュート回転", "スロースターター", "寸前", "短気", "ノミの心臓", "負け運", "四球", "乱調", "国際大会✕", "対ランナー✕", "雑草魂G", "雑草魂F", "悲劇のエース", "平成の怪物G", "平成の怪物F", "抜け球", "対ランナー", "ボール先行"]);
+const ES_GREEN_SET = new Set(["調子安定", "調子極端", "速球中心", "変化球中心", "投球位置左", "投球位置右", "テンポ◯", "野手調子安定", "野手調子極端", "人気者", "強振多用", "ミート多用", "積極打法", "慎重打法", "積極走塁", "積極守備", "チームプレイ◯", "チームプレイ✕", "選球眼", "積極盗塁", "慎重盗塁", "スーパーカートリオ", "ブンブン丸"]);
+const ES_RED_SK   = { test: x => ES_RED_SET.has(esSkNorm(x)) };
+const ES_GREEN_SK = { test: x => ES_GREEN_SET.has(esSkNorm(x)) };
+const ES_GOLD_SK  = { test: x => ES_GOLD_SET.has(esSkNorm(x)) };
 /* 特能1つの色：gold（金）／green（緑）／red（赤）／blue（青）／plain（ふつう）。先頭の★＝金、▼＝赤、◆＝緑で手動指定もできる */
 function esSkillClass(raw){
-  let x=String(raw||"").trim(), cls="";
+  let x=esSkNorm(raw), cls="";
   if(/^[★☆]/.test(x)){ x=x.slice(1); cls="gold"; } else if(/^[▼▽]/.test(x)){ x=x.slice(1); cls="red"; } else if(/^[◆◇]/.test(x)){ x=x.slice(1); cls="green"; }
-  const m=x.match(/^(.*?)([A-GＡ-Ｇ◎◯○〇×✕])$/); let nm=x, rk="";
-  if(m && m[1] && !ES_GREEN_SK.test(x) && !ES_RED_SK.test(x)){ nm=m[1]; rk=m[2].replace(/[Ａ-Ｇ]/,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); }
+  let nm=x, rk="";
+  if(!ES_GOLD_SK.test(x) && !ES_GREEN_SK.test(x) && !ES_RED_SK.test(x)){
+    /* 末尾のランク：A〜G はランク特能（チャンス・ノビなど）だけ、◯・◎・✕ はどの特能でも */
+    const m=x.match(/^(.*?)([A-G])$/), m2=x.match(/^(.*?)([◎◯✕])$/);
+    if(m && ES_RANK_SK.includes(m[1])){ nm=m[1]; rk=m[2]; }
+    else if(m2 && m2[1]){ nm=m2[1]; rk=m2[2]; }
+  }
   if(!cls){
-    if(ES_GOLD_SK.test(nm)) cls="gold";
+    if(ES_GOLD_SK.test(x)) cls="gold";
     else if(ES_GREEN_SK.test(x)) cls="green";
     else if(ES_RED_SK.test(x)) cls="red";
-    else if(rk) cls = /[AB◎◯○〇]/.test(rk) ? "blue" : /[CDE]/.test(rk) ? "plain" : "red";
+    else if(rk) cls = /[AB◎◯]/.test(rk) ? "blue" : /[CDE]/.test(rk) ? "plain" : "red";
     else cls="blue";
   }
   return {nm, rk, cls};
@@ -838,9 +847,9 @@ function esPlayerCard(l, g){
 
   /* --- プロフィール --- */
   const pro = g ? (g.team ? `${g.team}${g.rank?` ${g.rank}位`:""}` : g.course) : "";
-  const prof = g ? [["氏名", escHtml(g.name)], ["よびかた", escHtml(g.kana)], ["誕生日", escHtml(esBirthFmt(g.birth))], ["出身", escHtml(g.from)], ["性格", (()=>{ const c0=A["入学時"]&&A["入学時"].chara, c1=A["卒業時"]&&A["卒業時"].chara;
+  const prof = g ? [["氏名", escHtml(g.name)], ["よびかた", escHtml(g.kana)], ["出身", escHtml(g.from)], ["性格", (()=>{ const c0=A["入学時"]&&A["入学時"].chara, c1=A["卒業時"]&&A["卒業時"].chara;
       return c0&&c1&&c0!==c1 ? `${escHtml(c0)}<small class="pw2-arrow">→</small>${escHtml(c1)}` : escHtml(c1||c0||g.chara); })()],
-    ["スカウト", [g.scout?"スカウト":"", g.tensei?"転生":"", g.transfer?"転校生":""].filter(Boolean).join("・")], ["進路", escHtml(pro)]].filter(([,v])=>v) : [];
+    ["スカウト", [g.scout?"スカウト":"", g.tensei?"転生":"", g.transfer?"転校生":""].filter(Boolean).join("・")], ["進路", escHtml(pro)], ["誕生日", escHtml(esBirthFmt(g.birth))]].filter(([,v])=>v) : [];
 
   /* --- 上の部分（名前・背番号・★・通算の数字） --- */
   const num = (l && l.num) || (g ? esPwNum(g) : "");
@@ -1698,7 +1707,7 @@ function tyPlayerPage(arg){
   el.innerHTML=`<section class="t-pd"><div class="t-pd-in">
       <div class="t-pd-pos">${esPosTag(g.pos)}${gr?`${gr}年生`:tyDone(g)?"卒業生":""}</div>
       <h1>${escHtml(g.name)}</h1>
-      <p>${escHtml([g.year!=null?`${g.year}年度入学`:"", g.from?`${g.from}出身`:"", g.birth?`誕生日 ${esBirthFmt(g.birth)}`:"", pro].filter(Boolean).join("　"))}</p>
+      <p>${escHtml([g.year!=null?`${g.year}年度入学`:"", g.from?`${g.from}出身`:"", pro].filter(Boolean).join("　"))}</p>
       ${esTags(g)}
     </div></section>
     <div class="wrap narrow"><div class="crumb"><a href="#home">HOME</a> › <a href="#player">PLAYERS</a></div>${esPlayerCard(null, g)}</div>`;
@@ -1707,8 +1716,9 @@ function tyPlayerPage(arg){
 /* ---------- PLAYERSページに誕生日の欄を足す ---------- */
 function tyBdaySection(){
   let sec=$id("ty-bday");
-  if(!sec){ sec=document.createElement("div"); sec.className="card-section"; sec.id="ty-bday";
-    const host=document.querySelector('.es-pane[data-pane="player"] .wrap'); host.insertBefore(sec, host.children[1]); }
+  if(!sec){ sec=document.createElement("div"); sec.className="card-section"; sec.id="ty-bday"; }
+  const host=document.querySelector('.es-pane[data-pane="player"] .wrap');
+  if(host.lastElementChild!==sec) host.appendChild(sec); /* 誕生日はページの一番下 */
   const now=new Date().getMonth()+1;
   sec.innerHTML=`<div class="sec-title">誕生日</div>
     <div class="day-tabs t-mtabs">${Array.from({length:12},(_,i)=>i+1).map(m=>`<button type="button" class="day-tab${m===TY.bdM?" active":""}" data-m="${m}">${m}月${m===now?"<span class='tab-sub'>今月</span>":""}</button>`).join("")}</div>
