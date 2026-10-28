@@ -1174,27 +1174,39 @@ function esOppStats(){
 function esRenderRivals(){
   const el=document.getElementById("es-rivals"), S=esOppStats();
   if(!S.length){ el.innerHTML=errBox("まだ試合の記録がありません。"); return; }
-  const top=S.slice().sort((a,b)=>b.n-a.n||b.l-a.l).slice(0,10), max=top[0].n;
-  const beat=S.filter(s=>s.l>0).sort((a,b)=>b.l-a.l||a.n-b.n);
+  const G=ES.games, W=G.filter(g=>g.wl==="勝").length, L=G.filter(g=>g.wl==="負").length;
+  const top=S.slice().sort((a,b)=>b.n-a.n||b.l-a.l||b.last-a.last).slice(0,10);
+  const beat=S.filter(s=>s.l>0).sort((a,b)=>b.l-a.l||a.w-b.w||b.last-a.last);
   const byPref={}; S.forEach(s=>{ (byPref[s.pref||"不明"]=byPref[s.pref||"不明"]||[]).push(s); });
   const prefs=Object.keys(byPref).sort((a,b)=>{ const ia=ES_PREF_ORDER.indexOf(a), ib=ES_PREF_ORDER.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
-  if(!prefs.includes(ES.oppPref)) ES.oppPref=prefs[0];
+  if(!prefs.includes(ES.oppPref)) ES.oppPref=prefs.slice().sort((a,b)=>byPref[b].reduce((x,s)=>x+s.n,0)-byPref[a].reduce((x,s)=>x+s.n,0))[0];
+  const wlBar = s => `<span class="t-wl"><i class="w" style="width:${s.w/s.n*100}%"></i><i class="l" style="width:${s.l/s.n*100}%"></i></span>`;
   el.innerHTML=`
-    <div class="kk-sub es-sub0">よく戦った高校 TOP10</div>
-    <div class="mlist">${top.map(s=>esOppRow(s, max)).join("")}</div>
-    ${beat.length?`<div class="kk-sub es-sub">黒星をつけられた高校</div>
-      <div class="kk-chips">${beat.map(s=>`<span class="kk-chip">${escHtml(s.opp)}<small>${escHtml(s.pref)}・${s.l}敗</small></span>`).join("")}</div>`:""}
-    <div class="kk-sub es-sub">都道府県ごとの対戦校</div>
-    <div class="trip-selbox"><select id="es-opp-sel" aria-label="都道府県を選ぶ">${prefs.map(p=>{
-      const L=byPref[p], n=L.reduce((a,s)=>a+s.n,0);
-      return `<option value="${escHtml(p)}"${p===ES.oppPref?" selected":""}>${escHtml(p)}（${L.length}校・${n}試合）</option>`; }).join("")}</select></div>
-    <div id="es-opp-list"></div>`;
+    <div class="t-chips">
+      <div class="t-chip big"><span>対戦した高校</span><b>${S.length}<small>校</small></b><em>${prefs.length}都道府県</em></div>
+      <div class="t-chip"><span>総対戦</span><b>${G.length}<small>試合</small></b></div>
+      <div class="t-chip"><span>勝敗</span><b>${W}<small>勝</small>${L}<small>敗</small></b></div>
+      <div class="t-chip"><span>黒星をつけた高校</span><b>${beat.length}<small>校</small></b></div>
+    </div>
+    <div class="card-section"><div class="sec-title">よく戦った高校 TOP10</div>
+      <ol class="t-riv">${top.map((s,i)=>`<li><span class="t-rank-n">${i+1}</span>
+        <div class="t-riv-m"><b>${escHtml(s.opp)}</b><small>${escHtml(s.pref)}・最後の対戦 ${s.last}年度</small>${wlBar(s)}</div>
+        <div class="t-riv-v"><b>${s.n}<small>戦</small></b><span><em class="t-w">${s.w}勝</em><em class="t-l">${s.l}敗</em></span></div></li>`).join("")}</ol>
+    </div>
+    ${beat.length?`<div class="card-section"><div class="sec-title">黒星をつけられた高校</div>
+      <div class="t-loss">${beat.map(s=>`<div class="t-loss-c"><div class="t-loss-n">${s.l}<small>敗</small></div><div><b>${escHtml(s.opp)}</b><small>${escHtml(s.pref)}・${s.n}戦${s.w}勝${s.l}敗</small></div></div>`).join("")}</div></div>`:""}
+    <div class="card-section"><div class="sec-title">都道府県ごとの対戦校</div>
+      <div class="toolbar"><select class="sel" id="es-opp-sel" aria-label="都道府県を選ぶ">${prefs.map(p=>{
+        const L=byPref[p], n=L.reduce((a,s)=>a+s.n,0);
+        return `<option value="${escHtml(p)}"${p===ES.oppPref?" selected":""}>${escHtml(p)}（${L.length}校・${n}試合）</option>`; }).join("")}</select></div>
+      <div id="es-opp-list"></div></div>`;
   const draw=()=>{
-    const L=(byPref[ES.oppPref]||[]).slice().sort((a,b)=>b.n-a.n||b.last-a.last), mx=Math.max(1,...L.map(s=>s.n));
+    const L=(byPref[ES.oppPref]||[]).slice().sort((a,b)=>b.n-a.n||b.last-a.last);
     const w=L.reduce((a,s)=>a+s.w,0), l=L.reduce((a,s)=>a+s.l,0);
     document.getElementById("es-opp-list").innerHTML=`
-      <div class="stats-row"><div class="stat-chip">対戦校 <strong>${L.length}</strong> 校</div><div class="stat-chip"><strong>${w}</strong> 勝 <strong>${l}</strong> 敗</div></div>
-      <div class="mlist">${esFoldList(L, s=>esOppRow(s, mx, true), 10, "校")}</div>`;
+      <p class="t-pref-sum"><b>${escHtml(ES.oppPref)}</b> ${L.length}校と対戦・<span class="t-w">${w}勝</span><span class="t-l">${l}敗</span></p>
+      <div class="es-st-wrap"><table class="t-tbl t-opp-tbl"><thead><tr><th>高校</th><th>対戦</th><th>勝敗</th><th class="hide-sm">得点-失点</th><th>最後</th></tr></thead>
+      <tbody>${L.map(s=>`<tr><td><b>${escHtml(s.opp)}</b>${wlBar(s)}</td><td>${s.n}</td><td><span class="t-w">${s.w}</span>-<span class="t-l">${s.l}</span></td><td class="hide-sm">${s.rs}-${s.ra}</td><td>${s.last}</td></tr>`).join("")}</tbody></table></div>`;
   };
   document.getElementById("es-opp-sel").onchange=e=>{ ES.oppPref=e.target.value; draw(); };
   draw();
@@ -1208,52 +1220,49 @@ function esOppRow(s, max, detail){
 }
 
 /* ---------- ドラフト ---------- */
+/* 球団の色（カードの差し色だけに使う） */
+const ES_TEAM_COL = { "巨人":"#f97709", "読売":"#f97709", "阪神":"#ffd400", "中日":"#002569", "広島":"#e50012", "ヤクルト":"#00a650", "DeNA":"#0055a5", "横浜":"#0055a5",
+  "ソフトバンク":"#f5c700", "日本ハム":"#006298", "ロッテ":"#111111", "楽天":"#860010", "西武":"#102961", "オリックス":"#b08e3a" };
+const esTeamCol = t => { const k=Object.keys(ES_TEAM_COL).find(k=>String(t).includes(k)); return k?ES_TEAM_COL[k]:"#1f3d80"; };
 function esRenderDraft(){
   const el=document.getElementById("es-draft");
   const P=ES.grads.filter(g=>g.team);
   if(!P.length){ el.innerHTML=errBox("まだプロ入りした卒業生の記録がありません。"); return; }
-  const m={}; P.forEach(g=>{ const s=(m[g.team]=m[g.team]||{t:g.team, n:0, first:0}); s.n++; if(g.rank==="1") s.first++; });
-  const S=Object.values(m).sort((a,b)=>b.n-a.n||b.first-a.first), max=S[0].n;
-  const first=P.filter(g=>g.rank==="1").length;
-  if(!ES.draftTeam) ES.draftTeam=S[0].t;
+  const m={}; P.forEach(g=>{ const s=(m[g.team]=m[g.team]||{t:g.team, n:0, first:0, last:0}); s.n++; if(g.rank==="1") s.first++; if((g.year||0)+2>s.last) s.last=(g.year||0)+2; });
+  const S=Object.values(m).sort((a,b)=>b.n-a.n||b.first-a.first||a.t.localeCompare(b.t,"ja"));
+  const first=P.filter(g=>g.rank==="1").length, done=ES.grads.filter(g=>g.star!=null||g.course||g.team).length;
+  if(!ES.draftTeam) ES.draftTeam="すべて";
   el.innerHTML=`
-    <div class="stats-row">
-      <div class="stat-chip">プロ入り <strong>${P.length}</strong> 人</div>
-      <div class="stat-chip">ドラフト1位 <strong>${first}</strong> 人</div>
-      <div class="stat-chip">卒業生 <strong>${ES.grads.length}</strong> 人</div>
+    <div class="t-chips">
+      <div class="t-chip big"><span>プロ入りした卒業生</span><b>${P.length}<small>人</small></b><em>${done?`卒業生の${Math.round(P.length/done*100)}%`:""}</em></div>
+      <div class="t-chip"><span>ドラフト1位</span><b>${first}<small>人</small></b></div>
+      <div class="t-chip"><span>指名した球団</span><b>${S.length}<small>球団</small></b></div>
+      <div class="t-chip"><span>卒業生</span><b>${done}<small>人</small></b></div>
     </div>
-    <div class="mlist">${S.map(s=>`
-      <button type="button" class="mlist-row es-riv" data-team="${escHtml(s.t)}">
-        <span class="mlist-name"><span class="es-riv-name">${escHtml(s.t)}</span></span>
-        <span class="mlist-bar es"><span style="width:${s.n/max*100}%"></span></span>
-        <span class="mlist-val">${s.n}人<small>1位 ${s.first}人</small></span>
-      </button>`).join("")}</div>
-    <div class="kk-sub es-sub" id="es-draft-anchor">指名された選手</div>
-    <div class="trip-selbox"><select id="es-draft-sel" aria-label="球団を選ぶ">
-      <option value="すべて">すべての球団（${P.length}人）</option>
-      <option value="1位">ドラフト1位だけ（${first}人）</option>
-      ${S.map(s=>`<option value="${escHtml(s.t)}">${escHtml(s.t)}（${s.n}人）</option>`).join("")}
-    </select></div>
-    <div id="es-draft-list"></div>`;
-  const sel=document.getElementById("es-draft-sel");
+    <div class="card-section"><div class="sec-title">球団別</div>
+      <div class="t-teams">${S.map(s=>`<button type="button" class="t-team" data-team="${escHtml(s.t)}" style="--tc:${esTeamCol(s.t)}">
+        <span class="t-team-n">${escHtml(s.t)}</span><span class="t-team-v">${s.n}<small>人</small></span><span class="t-team-s">1位 ${s.first}人・最後 ${s.last}年度</span></button>`).join("")}</div>
+    </div>
+    <div class="card-section" id="es-draft-anchor"><div class="sec-title">指名された選手</div>
+      <div class="pill-tabs" id="es-dr-pills"><button class="pill" data-team="すべて">すべて（${P.length}）</button><button class="pill" data-team="1位">1位だけ（${first}）</button>${S.map(s=>`<button class="pill" data-team="${escHtml(s.t)}">${escHtml(s.t)}（${s.n}）</button>`).join("")}</div>
+      <div id="es-draft-list"></div></div>`;
   const draw=()=>{
-    sel.value=ES.draftTeam;
-    el.querySelectorAll(".mlist-row[data-team]").forEach(b=>b.classList.toggle("on", b.dataset.team===ES.draftTeam));
+    el.querySelectorAll("[data-team]").forEach(b=>b.classList.toggle(b.classList.contains("pill")?"on":"sel", b.dataset.team===ES.draftTeam));
     const L=P.filter(g=>ES.draftTeam==="すべて" || (ES.draftTeam==="1位" ? g.rank==="1" : g.team===ES.draftTeam))
-      .sort((a,b)=>(a.year||0)-(b.year||0) || (+a.rank||99)-(+b.rank||99));
-    document.getElementById("es-draft-list").innerHTML=L.length?esFoldList(L, g=>esPl("gm-row es-dr", `
-        <div class="gm-pos es-dr-rank">${g.rank?`${escHtml(g.rank)}<small>位</small>`:"-"}</div>
-        <div class="gm-main">
-          <div class="gm-title">${escHtml(g.name)}<span class="es-pos sm ${esPosCls(g.pos)}">${escHtml(g.pos)}</span>${esTags(g)}</div>
-          <div class="gm-meta">${escHtml([g.year?`${g.year}年度入学`:"", g.from, ES.draftTeam==="すべて"||ES.draftTeam==="1位"?g.team:""].filter(Boolean).join("・"))}</div>
-        </div>
-        <div class="gm-score es-val">${g.star!=null?`${g.star}<small>★</small>`:""}</div>`, g), 10, "人"):errBox("該当する選手がいません。");
+      .sort((a,b)=>(b.year||0)-(a.year||0) || (+a.rank||99)-(+b.rank||99));
+    const by={}; L.forEach(g=>(by[(g.year||0)+2]=by[(g.year||0)+2]||[]).push(g));
+    document.getElementById("es-draft-list").innerHTML = L.length ? Object.keys(by).map(Number).sort((a,b)=>b-a).map(y=>`
+      <div class="t-dr-y"><b class="en">${y}</b><span>年度 ドラフト</span><small>${by[y].length}人</small></div>
+      <div class="t-drs">${by[y].map(g=>{ const sur=String(g.name).split(/[\s　]+/)[0]; return `<a class="t-dr" href="#pl/${g.year||""}/${encodeURIComponent(g.name)}" style="--tc:${esTeamCol(g.team)}">
+        <span class="t-dr-r">${g.rank?`${escHtml(g.rank)}<small>位</small>`:"-"}</span>
+        <span class="face ph t-dr-f">${escHtml(sur)}</span>
+        <span class="t-dr-m"><b>${escHtml(g.name)}</b><span>${g.pos?`<span class="es-pos sm ${esPosCls(g.pos)}">${escHtml(g.pos)}</span>`:""}${escHtml([g.from, g.star!=null?`★${g.star}`:""].filter(Boolean).join("・"))}</span></span>
+        <span class="t-dr-t">${escHtml(g.team)}</span></a>`; }).join("")}</div>`).join("") : errBox("該当する選手がいません。");
   };
-  sel.onchange=()=>{ ES.draftTeam=sel.value; draw(); };
-  el.querySelectorAll(".mlist-row[data-team]").forEach(b=>b.onclick=()=>{
-    ES.draftTeam=b.dataset.team; draw();
-    const a=document.getElementById("es-draft-anchor"), nav=document.getElementById("hd");
-    window.scrollTo({ top:Math.max(0, window.scrollY+a.getBoundingClientRect().top-(nav?nav.offsetHeight:0)-8), behavior:prefersReduced()?"auto":"smooth" });
+  el.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>{
+    ES.draftTeam = (b.classList.contains("t-team") && ES.draftTeam===b.dataset.team) ? "すべて" : b.dataset.team; draw();
+    if(b.classList.contains("t-team")){ const a=document.getElementById("es-draft-anchor"), nav=document.getElementById("hd");
+      window.scrollTo({ top:Math.max(0, window.scrollY+a.getBoundingClientRect().top-(nav?nav.offsetHeight:0)-12), behavior:prefersReduced()?"auto":"smooth" }); }
   });
   draw();
 }
