@@ -704,3 +704,80 @@ img{display:block;max-width:100%;}
 .t-dh-p{font-family:var(--en);font-weight:800;font-size:13px;color:var(--gold-l);}
 .t-dh .t-fp{flex-direction:row;gap:6px;}
 @media(max-width:760px){ .t-fieldw{position:static;} }
+/* 守備位置の丸（漢字1文字・DH） */
+.t-fp-o{font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:14px;}
+@media(max-width:760px){ .t-fp-o{font-size:12px;} }
+/* ===== 卒業式のニュース画像（卒業証書風） ===== */
+.nv.gd{background:linear-gradient(120deg,#0b1a3d 0%,#16306a 65%,#24407d 100%);}
+.nv.gd::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-60deg,rgba(212,162,58,.07) 0 2.4cqw,transparent 2.4cqw 4.8cqw);}
+.nv.gd::after{content:"";position:absolute;left:0;top:0;bottom:0;width:1.4cqw;background:var(--gold);}
+.nv.gd .nv-kind{color:var(--gold-l);}
+.nv.gd .nv-kind small{color:rgba(255,255,255,.75);}
+.nv-gbig{position:absolute;left:6cqw;top:24cqw;font-family:var(--en);font-weight:800;font-style:italic;font-size:15cqw;line-height:1;color:#fff;}
+.nv-gbig small{font-family:"Noto Sans JP",sans-serif;font-style:normal;font-size:3.4cqw;margin-left:1.2cqw;font-weight:900;}
+.nv-gsub{position:absolute;left:6cqw;top:41cqw;font-size:2.8cqw;font-weight:800;color:#0b1a3d;background:var(--gold-l);padding:.4cqw 1.6cqw;}
+.nv-paper{position:absolute;right:6cqw;top:7cqw;width:40cqw;background:#fffdf6;color:#14223f;padding:2.4cqw 3cqw;box-shadow:0 1.4cqw 4cqw rgba(0,0,0,.35);transform:rotate(1.5deg);border:.5cqw solid #fff;outline:.3cqw solid var(--gold);outline-offset:-1.6cqw;}
+.nv-paper-h{text-align:center;font-size:2.6cqw;font-weight:900;letter-spacing:.6em;color:#8a6414;margin-bottom:1cqw;padding-bottom:.8cqw;border-bottom:.2cqw solid rgba(138,100,20,.4);}
+.nv-paper-r{display:flex;justify-content:space-between;align-items:baseline;gap:1.4cqw;padding:.55cqw 0;border-bottom:.15cqw dotted rgba(20,34,63,.2);}
+.nv-paper-r b{font-size:2.6cqw;font-weight:900;white-space:nowrap;}
+.nv-paper-r span{font-size:2cqw;font-weight:700;color:#5a6478;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nv-paper-m{text-align:right;font-size:2cqw;color:#5a6478;margin-top:.6cqw;}
+.nv.gd .nv-date{color:#fff;}
+.nv.gd .nv-kind{font-size:6.4cqw;max-width:46cqw;}
+.nv-paper{top:6cqw;width:38cqw;padding:2cqw 2.6cqw 1.6cqw;}
+.nv-paper-r{padding:.35cqw 0;}
+.nv-paper-r b{font-size:2.4cqw;} .nv-paper-r span{font-size:1.9cqw;}
+.nv-gbig{top:22cqw;} .nv-gsub{top:39cqw;}
+
+/* =====================================================================
+   スマホでは横スクロールをなくす
+   ===================================================================== */
+@media(max-width:640px){
+  /* ホームのニュース：スライダーをやめて、1本目を大きく＋見出し一覧 */
+  .top-hero .slides{display:block;overflow:visible;padding:16px 16px 4px;}
+  .top-hero .slide{display:none;max-width:none;}
+  .top-hero .slide:first-child{display:block;}
+  .top-hero .slide-cap h3{font-size:15px;}
+  .top-hero .hero-side{display:block;padding:4px 16px 14px;border-left:0;}
+  .top-hero .hero-side h2{display:none;}
+  .top-hero .hero-side .hlink:first-of-type{display:none;}
+  /* 表の共通：隠してよい列 */
+  .mh{display:none !important;}
+  /* 年度別成績：1年度＝1枚のカード */
+  .es-tbl-wrap{overflow:visible;border-top:0;}
+  .es-tbl{min-width:0;display:block;}
+  .es-tbl thead{display:none;}
+  .es-tbl tbody{display:flex;flex-direction:column;gap:8px;}
+  .es-tbl tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);background:#fff;}
+  .es-tbl tbody tr th,.es-tbl tbody tr td{border:0;background:none !important;}
+  .es-tbl tbody tr th.es-sticky{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;text-align:left;padding:8px 12px;background:var(--navy) !important;color:#fff;position:static;box-shadow:none !important;}
+  .es-tbl tbody tr.on th.es-sticky{background:var(--navy3) !important;box-shadow:inset 4px 0 0 var(--gold) !important;}
+  .es-tbl tbody tr th .es-pref{color:var(--gold-l);}
+  .es-tbl tbody tr td{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;white-space:normal;}
+  .es-tbl tbody tr td::before{content:attr(data-l);font-size:10px;font-weight:700;color:var(--ink2);}
+  .es-tbl tbody tr td.es-wl{grid-column:1/-1;flex-direction:row;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);font-size:13px;font-weight:800;}
+  .es-tbl tbody tr td.es-wl::before{content:"勝敗";}
+  .es-tbl tbody tr td.nil .es-none{color:var(--ink3);}
+  /* スコアボード：詰めて画面幅に収める */
+  .es-ls-wrap{overflow:visible;}
+  .es-ls{width:100%;min-width:0;table-layout:fixed;font-size:11px;}
+  .es-ls th,.es-ls td{padding:5px 0;}
+  .es-ls thead th:first-child,.es-ls tbody th{width:22%;padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* 選手成績の表：大事な列だけ */
+  .es-st-wrap{overflow:visible;}
+  .es-box-tbl{font-size:11px;table-layout:auto;}
+  .es-box-tbl th,.es-box-tbl td{padding:4px 3px;}
+  .es-box-tbl .es-bx-no{position:static;width:auto;min-width:0;max-width:none;font-size:10px;}
+  .es-box-tbl tbody th,.es-box-tbl thead th:nth-child(2){position:static;box-shadow:none;}
+  .es-box-tbl .es-bx-pl small,.es-box-tbl .es-bx-sub{display:none;}
+  .es-box-tbl .es-bx-nm{white-space:nowrap;}
+  .es-st-tbl{font-size:11px;} .es-st-tbl th,.es-st-tbl td{padding:5px 3px;}
+  .t-tbl{font-size:12px;} .t-tbl th,.t-tbl td{padding:7px 6px;}
+  /* 選手カードのタブ */
+  .pc-tabs{overflow:visible;}
+}
+@media(max-width:360px){
+  .mh2{display:none !important;}
+  .pc-tab{font-size:10px;letter-spacing:-.04em;}
+  .es-box-tbl .es-pos.sm{display:none;}
+}

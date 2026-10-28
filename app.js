@@ -300,7 +300,7 @@ function esRenderYears(){
     <tbody>${D.map(Y=>`
       <tr data-y="${Y.y}" tabindex="0" aria-label="${Y.y}年度の記録を見る"${Y.y===ES.sel?' class="on"':""}>
         <th class="es-sticky"><span class="es-y">${Y.y}</span><span class="es-pref">${escHtml(Y.pref)}</span></th>
-        ${ES_TAIKAI.map(t=>{ const r=Y.res[t.k]; return `<td>${r?`<span class="es-res ${esBadgeCls(r)}">${escHtml(r)}</span>`:`<span class="es-none">－</span>`}</td>`; }).join("")}
+        ${ES_TAIKAI.map(t=>{ const r=Y.res[t.k]; return `<td data-l="${t.s}"${r?"":' class="nil"'}>${r?`<span class="es-res ${esBadgeCls(r)}">${escHtml(r)}</span>`:`<span class="es-none">－</span>`}</td>`; }).join("")}
         <td class="es-wl">${Y.w}-${Y.l}</td>
       </tr>`).join("")}</tbody></table></div>
     <p class="kk-note-s">${ES.decade}年代：${D.length}年度・優勝 ${v} 回。年度をタップすると下に詳しい記録が出ます</p>`;
@@ -902,14 +902,15 @@ function esBoxScore(no){
 
   const T=esAgg(bat.map(x=>x.b));
   /* [見出し, 項目, 0でも表示するか] */
-  const BC=[["打数","ab",1],["得点","r"],["安打","h",1],["二","d2"],["三","d3"],["本","hr"],["打点","rbi"],["三振","so"],["四死","bb"],["犠打","sh"],["盗塁","sb"],["併殺","dp"],["失策","e"]];
-  const PC=[["回","ip",1],["球数","np",1],["打者","bf",1],["安打","ha",1],["本","hra"],["三振","k",1],["四死","pbb"],["失点","pr",1],["自責","er",1],["暴投","wp"]];
+  const BC=[["打数","ab",1],["得点","r",0,1],["安打","h",1],["二","d2",0,1],["三","d3",0,1],["本","hr"],["打点","rbi"],["三振","so"],["四死","bb"],["犠打","sh",0,1],["盗塁","sb"],["併殺","dp",0,1],["失策","e",0,1]];
+  const PC=[["回","ip",1],["球数","np",1,2],["打者","bf",1,1],["安打","ha",1],["本","hra",0,1],["三振","k",1],["四死","pbb"],["失点","pr",1],["自責","er",1],["暴投","wp",0,1]];
+  const mh = c => c[3]===1 ? ' class="mh"' : c[3]===2 ? ' class="mh2"' : "";
   return `<div class="es-box">
-    ${bat.length?`<div class="es-st-wrap"><table class="es-box-tbl"><thead><tr><th class="es-bx-no">打順</th><th>打撃</th>${BC.map(c=>`<th>${c[0]}</th>`).join("")}</tr></thead>
-      <tbody>${bat.map(({b,l})=>{ const st=isBat(l), sub=!st && !(l && l.order==="投"); return `<tr class="${sub?"sub":""}"><td class="es-bx-no">${st?escHtml(l.order):sub?"途中":""}</td><th>${tag(b,l,false, st||(l&&l.order==="投")?"":"rp")}</th>${BC.map(c=>`<td>${c[2]?esF(b[c[1]]):(b[c[1]]||"")}</td>`).join("")}</tr>`; }).join("")}
-      <tr class="tot"><td class="es-bx-no"></td><th>計</th>${BC.map(c=>`<td>${c[2]?T[c[1]]:(T[c[1]]||"")}</td>`).join("")}</tr></tbody></table></div>`:""}
-    ${pit.length?`<div class="es-st-wrap"><table class="es-box-tbl"><thead><tr><th class="es-bx-no"></th><th>投手</th>${PC.map(c=>`<th>${c[0]}</th>`).join("")}<th></th></tr></thead>
-      <tbody>${pit.map(({b,l},i)=>`<tr class="${i?"sub":""}"><td class="es-bx-no">${i?"":"先発"}</td><th>${tag(b,l,false,i?"rp":"")}</th>${PC.map(c=>`<td>${c[1]==="ip"?esIPfmt(b.ip):c[2]?esF(b[c[1]]):(b[c[1]]||"")}</td>`).join("")}<td>${b.dec?`<b class="es-dec ${esDecCls(b.dec)}">${b.dec}</b>`:""}</td></tr>`).join("")}</tbody></table></div>`:""}
+    ${bat.length?`<div class="es-st-wrap"><table class="es-box-tbl"><thead><tr><th class="es-bx-no">打順</th><th>打撃</th>${BC.map(c=>`<th${mh(c)}>${c[0]}</th>`).join("")}</tr></thead>
+      <tbody>${bat.map(({b,l})=>{ const st=isBat(l), sub=!st && !(l && l.order==="投"); return `<tr class="${sub?"sub":""}"><td class="es-bx-no">${st?escHtml(l.order):sub?"途中":""}</td><th>${tag(b,l,false, st||(l&&l.order==="投")?"":"rp")}</th>${BC.map(c=>`<td${mh(c)}>${c[2]?esF(b[c[1]]):(b[c[1]]||"")}</td>`).join("")}</tr>`; }).join("")}
+      <tr class="tot"><td class="es-bx-no"></td><th>計</th>${BC.map(c=>`<td${mh(c)}>${c[2]?T[c[1]]:(T[c[1]]||"")}</td>`).join("")}</tr></tbody></table></div>`:""}
+    ${pit.length?`<div class="es-st-wrap"><table class="es-box-tbl"><thead><tr><th class="es-bx-no"></th><th>投手</th>${PC.map(c=>`<th${mh(c)}>${c[0]}</th>`).join("")}<th></th></tr></thead>
+      <tbody>${pit.map(({b,l},i)=>`<tr class="${i?"sub":""}"><td class="es-bx-no">${i?"":"先発"}</td><th>${tag(b,l,false,i?"rp":"")}</th>${PC.map(c=>`<td${mh(c)}>${c[1]==="ip"?esIPfmt(b.ip):c[2]?esF(b[c[1]]):(b[c[1]]||"")}</td>`).join("")}<td>${b.dec?`<b class="es-dec ${esDecCls(b.dec)}">${b.dec}</b>`:""}</td></tr>`).join("")}</tbody></table></div>`:""}
   </div>`;
 }
 function esLuRow(l, starter, idx){
@@ -935,7 +936,7 @@ function esFieldHtml(starters){
   });
   const dh=spots.filter(x=>!x.xy);
   const tag=({l,i,p})=>{ const g=esFindGrad(l), nm=g?g.name:l.name, sur=String(nm).split(/[\s　]+/)[0];
-    return `<button type="button" class="t-fp ${esPosCls(p)}" data-lu="${i}" aria-label="${escHtml(nm)}"><span class="t-fp-o">${l.order==="投"?"P":escHtml(l.order)}</span><b>${escHtml(sur)}</b></button>`; };
+    return `<button type="button" class="t-fp ${esPosCls(p)}" data-lu="${i}" aria-label="${escHtml(nm)}"><span class="t-fp-o">${escHtml(p==="指"?"DH":p)}</span><b>${escHtml(sur)}</b></button>`; };
   return `<div class="t-fieldw"><div class="t-field">
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       <defs><linearGradient id="t-gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7d47"/><stop offset="1" stop-color="#256a3b"/></linearGradient></defs>
@@ -948,7 +949,7 @@ function esFieldHtml(starters){
     </svg>
     ${spots.filter(x=>x.xy).map(x=>`<div class="t-fpw" style="left:${x.xy[0]}%;top:${x.xy[1]}%">${tag(x)}</div>`).join("")}
   </div>
-  ${dh.length?`<div class="t-dh">${dh.map(x=>`<span class="t-dh-p">${escHtml(x.p==="指"?"DH":x.p)}</span>${tag(x)}`).join("")}</div>`:""}</div>`;
+  ${dh.length?`<div class="t-dh">${dh.map(tag).join("")}</div>`:""}</div>`;
 }
 function esRenderLineup(){
   const L=ES.lineup.filter(l=>l.year===ES.sel && l.season===ES.lineupSeason);
@@ -1189,10 +1190,10 @@ function esTeamRankHtml(){
     const nos=new Set(G.map(g=>g.no)), B=ES.box.filter(b=>nos.has(b.no)), t=esAgg(B);
     const rs=G.reduce((a,g)=>a+g.rs,0), ra=G.reduce((a,g)=>a+g.ra,0);
     return `<tr><th><span class="es-pw pw-${k}">${k}</span></th><td>${G.length}</td><td>${w}-${l}${d?`-${d}`:""}</td>
-      <td>${w+l?esAvgFmt(w/(w+l)):"-"}</td><td>${(rs/G.length).toFixed(1)}</td><td>${(ra/G.length).toFixed(1)}</td>
+      <td>${w+l?esAvgFmt(w/(w+l)):"-"}</td><td class="mh">${(rs/G.length).toFixed(1)}</td><td class="mh">${(ra/G.length).toFixed(1)}</td>
       <td>${esF(t.avg,esAvgFmt)}</td><td>${esF(t.era,v=>v.toFixed(2))}</td></tr>`;
   }).join("");
-  return `<div class="es-st-wrap"><table class="es-st-tbl es-pw-tbl es-rank-tbl"><thead><tr><th>戦力</th><th>試合</th><th>勝敗</th><th>勝率</th><th>平均得点</th><th>平均失点</th><th>打率</th><th>防御率</th></tr></thead>
+  return `<div class="es-st-wrap"><table class="es-st-tbl es-pw-tbl es-rank-tbl"><thead><tr><th>戦力</th><th>試合</th><th>勝敗</th><th>勝率</th><th class="mh">平均得点</th><th class="mh">平均失点</th><th>打率</th><th>防御率</th></tr></thead>
     <tbody>${rows}</tbody></table></div>
     <p class="kk-note-s">打率・防御率は選手成績を入れた試合から計算。</p>`;
 }
@@ -1450,9 +1451,14 @@ function tyVisual(n){
   if(n.cat==="RECORD") return `<div class="nv s"><div class="nv-sn">RECORD</div><div class="nv-sbig">${n.big}<small>${n.unit}</small></div>
       <div class="nv-stt"><span>${escHtml(n.unit==="勝"?"通算勝利":"連勝記録")}</span></div><div class="nv-date">${n.date}</div>${mark}</div>`;
   if(n.cat==="GRAD"){
-    const pro=n.L.filter(g=>g.team);
-    return `<div class="nv s g"><div class="nv-sn">GRADUATION</div><div class="nv-sbig">${n.L.length}<small>名</small></div>
-      <div class="nv-stt">${pro.length?pro.slice(0,4).map(g=>`<span>${escHtml(g.name)}・${escHtml(g.team)}</span>`).join(""):`<span>${n.y}年度 卒業式</span>`}</div><div class="nv-date">${n.date}</div>${mark}</div>`;
+    /* 卒業証書のようなカード：プロ入り→★の高い順に5人まで */
+    const L=n.L.slice().sort((a,b)=>(b.team?1:0)-(a.team?1:0) || (b.star||0)-(a.star||0)).slice(0,4);
+    const pro=n.L.filter(g=>g.team).length;
+    return `<div class="nv gd"><div class="nv-kind">GRADUATION<small>${n.y}年度 卒業式</small></div>
+      <div class="nv-gbig">${n.L.length}<small>名が卒業</small></div>
+      <div class="nv-gsub">${pro?`プロ入り ${pro}名`:"それぞれの道へ"}</div>
+      <div class="nv-paper"><div class="nv-paper-h">卒業生</div>${L.map(g=>`<div class="nv-paper-r"><b>${escHtml(g.name)}</b><span>${escHtml(g.team?`${g.team}${g.rank?` ${g.rank}位`:""}`:(g.course||""))}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-paper-m">ほか${n.L.length-L.length}名</div>`:""}</div>
+      <div class="nv-date">${n.date}</div>${mark}</div>`;
   }
   /* 入学式・ドラフトは明るいカード */
   const top = n.cat==="DRAFT" ? n.L[0] : n.L.slice().sort((a,b)=>(b.star0||0)-(a.star0||0))[0];
