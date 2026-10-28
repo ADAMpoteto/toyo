@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=20261028b">
+<link rel="stylesheet" href="style.css?v=20261028c">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
@@ -17,22 +17,21 @@
   <div class="nav-top">
     <div class="nav-brand"><img src="icon-192.png" alt="" width="22" height="22" style="border-radius:4px">東洋大姫路　栄冠ナイン</div>
   </div>
+  <div class="nav-links">
+    <button class="nav-btn active" data-nav="year" onclick="esGoto('year')">年度</button>
+    <button class="nav-btn" data-nav="player" onclick="esGoto('player')">選手</button>
+    <button class="nav-btn" data-nav="rec" onclick="esGoto('rec')">記録</button>
+    <button class="nav-btn" data-nav="opp" onclick="esGoto('opp')">対戦校</button>
+  </div>
 </nav>
 
 <!-- ========== 栄冠ナイン ========== -->
 <div id="eikan" class="page active">
 <div class="container">
-  <div class="page-header"><h1>栄冠ナイン</h1><p>試合・スタメン・卒業生の記録</p></div>
-  <div class="hero" id="es-hero"><div class="loading">読み込み中…</div></div>
-
-  <div class="day-tabs es-subnav" id="es-subnav" role="tablist" aria-label="表示の切り替え">
-    <button type="button" class="day-tab active" role="tab" data-pane="year" aria-selected="true">年度</button>
-    <button type="button" class="day-tab" role="tab" data-pane="player" aria-selected="false">選手</button>
-    <button type="button" class="day-tab" role="tab" data-pane="rec" aria-selected="false">記録</button>
-    <button type="button" class="day-tab" role="tab" data-pane="opp" aria-selected="false">対戦校</button>
-  </div>
+  <div class="page-header"><h1 id="es-title">年度</h1><p id="es-sub">年度ごとの成績と試合の記録</p></div>
 
   <div class="es-pane" data-pane="year">
+  <div class="hero" id="es-hero"><div class="loading">読み込み中…</div></div>
   <div class="card-section">
     <div class="sec-title">年度別成績</div>
     <div id="es-years"><div class="loading">読み込み中…</div></div>
@@ -100,6 +99,6 @@
   データはGoogleスプレッドシートから取得しています。
 </footer>
 
-<script src="app.js?v=20261028b"></script>
+<script src="app.js?v=20261028c"></script>
 </body>
 </html>

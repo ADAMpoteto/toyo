@@ -282,14 +282,7 @@ function esRenderHero(){
 }
 
 /* ---------- 表示の切り替え（年度／選手／記録・対戦校） ---------- */
-function esInitSubnav(){
-  const tabs=document.querySelectorAll("#es-subnav .day-tab");
-  tabs.forEach(b=>b.onclick=()=>{
-    ES.pane=b.dataset.pane;
-    tabs.forEach(x=>{ const on=x===b; x.classList.toggle("active", on); x.setAttribute("aria-selected", on?"true":"false"); });
-    document.querySelectorAll("#eikan .es-pane").forEach(p=>p.hidden = p.dataset.pane!==ES.pane);
-  });
-}
+function esInitSubnav(){ /* ヘッダーのメニューで切り替え（esGoto） */ }
 
 /* ---------- 年度別成績（年代ごとに表示） ---------- */
 function esRenderYears(){
@@ -1264,6 +1257,34 @@ function esRenderDraft(){
   draw();
 }
 
+
+/* ---------- ページの切り替え（ヘッダーのメニュー・戻る/進む・直リンク対応） ---------- */
+const ES_PAGES = {
+  year:   { t:"年度",   sub:"年度ごとの成績と試合の記録" },
+  player: { t:"選手",   sub:"選手名鑑・歴代ベスト9・ランキング・ドラフト" },
+  rec:    { t:"記録",   sub:"チームの記録と相手の戦力別の成績" },
+  opp:    { t:"対戦校", sub:"対戦した学校との成績" }
+};
+function esApplyPane(pane){
+  if(!ES_PAGES[pane]) pane="year";
+  ES.pane=pane;
+  document.querySelectorAll("#eikan .es-pane").forEach(p=>p.hidden = p.dataset.pane!==pane);
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active", b.dataset.nav===pane));
+  document.getElementById("es-title").textContent=ES_PAGES[pane].t;
+  document.getElementById("es-sub").textContent=ES_PAGES[pane].sub;
+  document.title=`東洋大姫路 | ${ES_PAGES[pane].t}`;
+  window.scrollTo(0,0);
+}
+function esGoto(pane){
+  esApplyPane(pane);
+  const h="#"+ES.pane; if(location.hash!==h) history.pushState({pane:ES.pane}, "", h);
+}
+window.addEventListener("popstate", e=>esApplyPane((e.state&&e.state.pane) || location.hash.replace(/^#/,"")));
+(function initRouting(){
+  const pane=ES_PAGES[location.hash.replace(/^#/,"")] ? location.hash.replace(/^#/,"") : "year";
+  history.replaceState({pane}, "", "#"+pane);
+  esApplyPane(pane);
+})();
 
 /* ---------- 初期化 ---------- */
 window.addEventListener("scroll", ()=>{ document.querySelector("nav").classList.toggle("scrolled", window.scrollY>4); }, {passive:true});
