@@ -662,3 +662,45 @@ img{display:block;max-width:100%;}
 .t-gl li.cur{background:var(--sky-l);box-shadow:inset 4px 0 0 var(--gold);}
 .nv.m.L{background:radial-gradient(120% 100% at 50% 0%,#3a3f55 0%,#0b1a3d 72%);}
 .nv.m.L .nv-res{color:#ff8a8a;}
+/* ===== NEWS ページ送り ===== */
+.t-pg-info{font-size:12px;font-weight:700;color:var(--ink2);margin-left:auto;}
+.t-pg{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:32px;flex-wrap:wrap;}
+.t-pg-ns{display:flex;gap:4px;align-items:center;}
+.t-pg-n,.t-pg-a{min-width:40px;height:40px;padding:0 12px;border:1px solid var(--line);background:#fff;font-family:var(--en);font-weight:800;font-size:16px;letter-spacing:.06em;color:var(--navy);cursor:pointer;}
+.t-pg-n:hover,.t-pg-a:not([disabled]):hover{background:var(--bg2);}
+.t-pg-n.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.t-pg-a[disabled]{opacity:.35;cursor:default;}
+.t-pg-gap{color:var(--ink3);padding:0 2px;}
+@media(max-width:480px){ .t-pg{gap:6px;} .t-pg-n,.t-pg-a{min-width:34px;height:36px;padding:0 8px;font-size:14px;} }
+/* ===== スタメン（左にフィールド、右に打順・ベンチ） ===== */
+.t-lu{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start;}
+.t-field{position:relative;aspect-ratio:1/0.92;background:var(--navy);overflow:hidden;}
+.t-field svg{position:absolute;left:3%;top:4%;width:94%;height:94%;}
+.t-fpw{position:absolute;transform:translate(-50%,-50%);}
+.t-fp{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;cursor:pointer;padding:0;color:#fff;}
+.t-fp-o{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#fff;color:var(--navy);font-family:var(--en);font-weight:800;font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,.35);border:3px solid var(--pos-etc);transition:transform .15s;}
+.t-fp.p-pit .t-fp-o{border-color:var(--pos-pit);} .t-fp.p-cat .t-fp-o{border-color:var(--pos-cat);} .t-fp.p-inf .t-fp-o{border-color:var(--pos-inf);} .t-fp.p-of .t-fp-o{border-color:var(--pos-of);}
+.t-fp b{font-size:12px;font-weight:800;white-space:nowrap;background:rgba(11,26,61,.82);padding:1px 7px;}
+.t-fp:hover .t-fp-o{transform:scale(1.08);}
+.t-dh{position:absolute;right:3%;bottom:4%;display:flex;align-items:center;gap:6px;background:rgba(11,26,61,.85);padding:6px 8px;}
+.t-dh span{font-family:var(--en);font-weight:800;font-size:13px;color:var(--gold-l);}
+.t-dh .t-fp{flex-direction:row;gap:6px;}
+.t-lu-list .es-lu{border-top:2px solid var(--navy);}
+.t-lu-h{display:flex;align-items:baseline;gap:8px;font-family:var(--en);font-weight:800;font-style:italic;font-size:22px;color:var(--navy);margin:0 0 6px;}
+.t-lu-h small{font-family:"Noto Sans JP",sans-serif;font-style:normal;font-size:11px;color:var(--ink2);}
+.t-lu-list .t-lu-h:not(:first-child){margin-top:20px;}
+@media(max-width:760px){ .t-lu{grid-template-columns:minmax(0,1fr);gap:18px;} .t-fp-o{width:26px;height:26px;font-size:14px;} .t-fp b{font-size:11px;} }
+/* 特殊能力は前と同じマス目（PC 4列・スマホ 2列）で固定の順 */
+.pc-sks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;}
+.pc-sk{justify-content:space-between;min-height:38px;padding:5px 8px;}
+.pc-sk.none{background:#f5f6f9;color:var(--ink2);border-color:var(--line);} .pc-sk.none b{color:var(--ink3);background:#fff;}
+.pc-sk.empty{background:#fafbfc;border:1px dashed var(--line);}
+.pc-sk.gold{justify-content:center;}
+@media(max-width:640px){ .pc-sks{grid-template-columns:repeat(2,minmax(0,1fr));} .pc-sk.gap,.pc-sk.pad4{display:none;} }
+.pc-sk{white-space:nowrap;font-size:11.5px;letter-spacing:-.02em;gap:4px;padding:5px 6px;}
+.pc-sk b{flex:0 0 auto;}
+.t-fieldw{position:sticky;top:calc(var(--hd) + 16px);}
+.t-dh{position:static;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:var(--navy);padding:10px 12px;border-top:1px solid rgba(255,255,255,.12);}
+.t-dh-p{font-family:var(--en);font-weight:800;font-size:13px;color:var(--gold-l);}
+.t-dh .t-fp{flex-direction:row;gap:6px;}
+@media(max-width:760px){ .t-fieldw{position:static;} }
