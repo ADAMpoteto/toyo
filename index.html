@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東洋大姫路 | 栄冠ナイン</title>
+<meta name="apple-mobile-web-app-title" content="東洋大姫路">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=20261028b">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-top">
+    <div class="nav-brand"><img src="icon-192.png" alt="" width="22" height="22" style="border-radius:4px">東洋大姫路　栄冠ナイン</div>
+  </div>
+</nav>
+
+<!-- ========== 栄冠ナイン ========== -->
+<div id="eikan" class="page active">
+<div class="container">
+  <div class="page-header"><h1>栄冠ナイン</h1><p>試合・スタメン・卒業生の記録</p></div>
+  <div class="hero" id="es-hero"><div class="loading">読み込み中…</div></div>
+
+  <div class="day-tabs es-subnav" id="es-subnav" role="tablist" aria-label="表示の切り替え">
+    <button type="button" class="day-tab active" role="tab" data-pane="year" aria-selected="true">年度</button>
+    <button type="button" class="day-tab" role="tab" data-pane="player" aria-selected="false">選手</button>
+    <button type="button" class="day-tab" role="tab" data-pane="rec" aria-selected="false">記録</button>
+    <button type="button" class="day-tab" role="tab" data-pane="opp" aria-selected="false">対戦校</button>
+  </div>
+
+  <div class="es-pane" data-pane="year">
+  <div class="card-section">
+    <div class="sec-title">年度別成績</div>
+    <div id="es-years"><div class="loading">読み込み中…</div></div>
+  </div>
+
+  <div class="card-section" id="es-year-anchor">
+    <div class="sec-title">年度の記録</div>
+    <div class="trip-selbox"><select id="es-year-sel" aria-label="年度を選ぶ"><option>読み込み中…</option></select></div>
+    <div id="es-year"></div>
+  </div>
+  </div>
+
+  <div class="es-pane" data-pane="player" hidden>
+  <div class="card-section">
+    <div class="sec-title">選手名鑑</div>
+    <div class="trip-selbox"><select id="es-roster-sel" aria-label="入学年度を選ぶ"></select></div>
+    <div id="es-roster"></div>
+  </div>
+
+  <div class="card-section">
+    <div class="sec-title">歴代ベスト9</div>
+    <div class="day-tabs" id="es-b9-tabs"></div>
+    <div class="trip-selbox" id="es-b9-team" hidden><select id="es-team-sel" aria-label="球団を選ぶ"></select></div>
+    <div id="es-b9"></div>
+    <p class="kk-note-s" id="es-b9-note"></p>
+  </div>
+
+  <div class="card-section">
+    <div class="sec-title">歴代ランキング TOP10</div>
+    <div class="day-tabs" id="es-rk-tabs"></div>
+    <div id="es-rk"></div>
+    <p class="kk-note-s" id="es-rk-note"></p>
+  </div>
+
+  <div class="card-section">
+    <div class="sec-title">ドラフト</div>
+    <div id="es-draft"></div>
+  </div>
+
+  </div>
+
+  <div class="es-pane" data-pane="rec" hidden>
+  <div class="card-section">
+    <div class="sec-title">記録</div>
+    <div id="es-records"></div>
+  </div>
+
+  <div class="card-section">
+    <div class="sec-title">相手の戦力別の成績</div>
+    <div id="es-pw"></div>
+  </div>
+  </div>
+
+  <div class="es-pane" data-pane="opp" hidden>
+  <div class="card-section">
+    <div class="sec-title">対戦校</div>
+    <div id="es-rivals"></div>
+  </div>
+  </div>
+</div>
+</div>
+
+<footer class="foot">
+  東洋大姫路 栄冠ナイン記録<br>
+  データはGoogleスプレッドシートから取得しています。
+</footer>
+
+<script src="app.js?v=20261028b"></script>
+</body>
+</html>
