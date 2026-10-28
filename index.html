@@ -2,103 +2,144 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>東洋大姫路 | 栄冠ナイン</title>
 <meta name="apple-mobile-web-app-title" content="東洋大姫路">
+<meta name="theme-color" content="#0f2350">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=20261028c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,700;1,800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261028t3">
+<link rel="stylesheet" href="site.css?v=20261028t3">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
-<nav>
-  <div class="nav-top">
-    <div class="nav-brand"><img src="icon-192.png" alt="" width="22" height="22" style="border-radius:4px">東洋大姫路　栄冠ナイン</div>
+<header class="hd" id="hd">
+  <div class="hd-in">
+    <a class="hd-brand" href="#home" aria-label="ホーム">
+      <img src="icon-192.png" alt="" width="46" height="46">
+      <span class="hd-name"><b>TOYO HIMEJI</b><small>BASEBALL CLUB ・ 栄冠ナイン</small></span>
+    </a>
+    <nav class="hd-nav" aria-label="メニュー">
+      <a href="#news" data-nav="news"><b>NEWS</b><small>ニュース</small></a>
+      <a href="#year" data-nav="year"><b>SEASON</b><small>年度</small></a>
+      <a href="#player" data-nav="player"><b>PLAYERS</b><small>選手</small></a>
+      <a href="#rec" data-nav="rec"><b>RECORDS</b><small>記録</small></a>
+      <a href="#draft" data-nav="draft"><b>DRAFT</b><small>ドラフト</small></a>
+      <a href="#opp" data-nav="opp"><b>RIVALS</b><small>対戦校</small></a>
+    </nav>
+    <button class="hd-menu" id="menu-btn" aria-label="メニューを開く" aria-expanded="false" aria-controls="drawer"><i></i><i></i><i></i><span>MENU</span></button>
   </div>
-  <div class="nav-links">
-    <button class="nav-btn active" data-nav="year" onclick="esGoto('year')">年度</button>
-    <button class="nav-btn" data-nav="player" onclick="esGoto('player')">選手</button>
-    <button class="nav-btn" data-nav="rec" onclick="esGoto('rec')">記録</button>
-    <button class="nav-btn" data-nav="opp" onclick="esGoto('opp')">対戦校</button>
-  </div>
-</nav>
+</header>
 
-<!-- ========== 栄冠ナイン ========== -->
-<div id="eikan" class="page active">
-<div class="container">
-  <div class="page-header"><h1 id="es-title">年度</h1><p id="es-sub">年度ごとの成績と試合の記録</p></div>
-
-  <div class="es-pane" data-pane="year">
-  <div class="hero" id="es-hero"><div class="loading">読み込み中…</div></div>
-  <div class="card-section">
-    <div class="sec-title">年度別成績</div>
-    <div id="es-years"><div class="loading">読み込み中…</div></div>
-  </div>
-
-  <div class="card-section" id="es-year-anchor">
-    <div class="sec-title">年度の記録</div>
-    <div class="trip-selbox"><select id="es-year-sel" aria-label="年度を選ぶ"><option>読み込み中…</option></select></div>
-    <div id="es-year"></div>
-  </div>
-  </div>
-
-  <div class="es-pane" data-pane="player" hidden>
-  <div class="card-section">
-    <div class="sec-title">選手名鑑</div>
-    <div class="trip-selbox"><select id="es-roster-sel" aria-label="入学年度を選ぶ"></select></div>
-    <div id="es-roster"></div>
-  </div>
-
-  <div class="card-section">
-    <div class="sec-title">歴代ベスト9</div>
-    <div class="day-tabs" id="es-b9-tabs"></div>
-    <div class="trip-selbox" id="es-b9-team" hidden><select id="es-team-sel" aria-label="球団を選ぶ"></select></div>
-    <div id="es-b9"></div>
-    <p class="kk-note-s" id="es-b9-note"></p>
-  </div>
-
-  <div class="card-section">
-    <div class="sec-title">歴代ランキング TOP10</div>
-    <div class="day-tabs" id="es-rk-tabs"></div>
-    <div id="es-rk"></div>
-    <p class="kk-note-s" id="es-rk-note"></p>
-  </div>
-
-  <div class="card-section">
-    <div class="sec-title">ドラフト</div>
-    <div id="es-draft"></div>
-  </div>
-
-  </div>
-
-  <div class="es-pane" data-pane="rec" hidden>
-  <div class="card-section">
-    <div class="sec-title">記録</div>
-    <div id="es-records"></div>
-  </div>
-
-  <div class="card-section">
-    <div class="sec-title">相手の戦力別の成績</div>
-    <div id="es-pw"></div>
-  </div>
-  </div>
-
-  <div class="es-pane" data-pane="opp" hidden>
-  <div class="card-section">
-    <div class="sec-title">対戦校</div>
-    <div id="es-rivals"></div>
-  </div>
-  </div>
-</div>
+<div class="drawer" id="drawer" hidden>
+  <nav class="drawer-nav" aria-label="メニュー">
+    <a href="#home" data-nav="home"><b>HOME</b><small>ホーム</small></a>
+    <a href="#news" data-nav="news"><b>NEWS</b><small>ニュース</small></a>
+    <a href="#year" data-nav="year"><b>SEASON</b><small>年度ごとの成績・試合</small></a>
+    <a href="#player" data-nav="player"><b>PLAYERS</b><small>選手名鑑・ベスト9・ランキング</small></a>
+    <a href="#rec" data-nav="rec"><b>RECORDS</b><small>勝利数・連勝・チーム記録</small></a>
+    <a href="#draft" data-nav="draft"><b>DRAFT</b><small>プロ入りした卒業生</small></a>
+    <a href="#opp" data-nav="opp"><b>RIVALS</b><small>対戦校</small></a>
+  </nav>
 </div>
 
-<footer class="foot">
-  東洋大姫路 栄冠ナイン記録<br>
-  データはGoogleスプレッドシートから取得しています。
+<main id="eikan">
+
+  <!-- HOME・NEWS・選手ページは app.js で中身を作る -->
+  <section class="es-pane" data-pane="home" id="pg-home"><div class="t-loading">読み込み中…</div></section>
+  <section class="es-pane" data-pane="news" id="pg-news" hidden></section>
+  <section class="es-pane" data-pane="pl" id="pg-pl" hidden></section>
+
+  <section class="es-pane" data-pane="year" hidden>
+    <div class="ph-band" data-bg="SEASON"><div class="ph-in"><h1><b>SEASON</b><small>年度ごとの成績と試合の記録</small></h1></div></div>
+    <div class="wrap">
+      <div class="hero" id="es-hero"><div class="t-loading">読み込み中…</div></div>
+      <div class="card-section">
+        <div class="sec-title">年度別成績</div>
+        <div id="es-years"><div class="t-loading">読み込み中…</div></div>
+      </div>
+      <div class="card-section" id="es-year-anchor">
+        <div class="sec-title">年度の記録</div>
+        <div class="trip-selbox"><select id="es-year-sel" aria-label="年度を選ぶ"><option>読み込み中…</option></select></div>
+        <div id="es-year"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="es-pane" data-pane="player" hidden>
+    <div class="ph-band" data-bg="PLAYERS"><div class="ph-in"><h1><b>PLAYERS</b><small>選手名鑑・歴代ベスト9・ランキング</small></h1></div></div>
+    <div class="wrap">
+      <div class="card-section">
+        <div class="sec-title">選手名鑑</div>
+        <div class="trip-selbox"><select id="es-roster-sel" aria-label="入学年度を選ぶ"></select></div>
+        <div id="es-roster"></div>
+      </div>
+      <div class="card-section">
+        <div class="sec-title">歴代ベスト9</div>
+        <div class="day-tabs" id="es-b9-tabs"></div>
+        <div class="trip-selbox" id="es-b9-team" hidden><select id="es-team-sel" aria-label="球団を選ぶ"></select></div>
+        <div id="es-b9"></div>
+        <p class="kk-note-s" id="es-b9-note"></p>
+      </div>
+      <div class="card-section">
+        <div class="sec-title">歴代ランキング TOP10</div>
+        <div class="day-tabs" id="es-rk-tabs"></div>
+        <div id="es-rk"></div>
+        <p class="kk-note-s" id="es-rk-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="es-pane" data-pane="rec" hidden>
+    <div class="ph-band" data-bg="RECORDS"><div class="ph-in"><h1><b>RECORDS</b><small>勝利数・連勝・チームの記録</small></h1></div></div>
+    <div class="wrap">
+      <div id="es-wins"></div>
+      <div class="card-section">
+        <div class="sec-title">チームの記録</div>
+        <div id="es-records"></div>
+      </div>
+      <div class="card-section">
+        <div class="sec-title">相手の戦力別の成績</div>
+        <div id="es-pw"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="es-pane" data-pane="draft" hidden>
+    <div class="ph-band" data-bg="DRAFT"><div class="ph-in"><h1><b>DRAFT</b><small>プロ野球に進んだ卒業生</small></h1></div></div>
+    <div class="wrap">
+      <div class="card-section">
+        <div id="es-draft"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="es-pane" data-pane="opp" hidden>
+    <div class="ph-band" data-bg="RIVALS"><div class="ph-in"><h1><b>RIVALS</b><small>対戦した高校との成績</small></h1></div></div>
+    <div class="wrap">
+      <div class="card-section">
+        <div id="es-rivals"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="ft">
+  <div class="ft-in">
+    <div class="ft-brand"><img src="icon-192.png" alt="" width="64" height="64"><div><b>TOYO HIMEJI</b><small>東洋大姫路 栄冠ナイン記録</small></div></div>
+    <nav class="ft-map">
+      <a href="#news">NEWS</a><a href="#year">SEASON</a><a href="#player">PLAYERS</a><a href="#rec">RECORDS</a><a href="#draft">DRAFT</a><a href="#opp">RIVALS</a>
+    </nav>
+    <p class="ft-copy">© TOYO HIMEJI <small>データはGoogleスプレッドシートから取得しています。</small></p>
+  </div>
 </footer>
 
-<script src="app.js?v=20261028c"></script>
+<script src="app.js?v=20261028t3"></script>
 </body>
 </html>

@@ -18,18 +18,6 @@ a:focus-visible,button:focus-visible,select:focus-visible,[tabindex]:focus-visib
   *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
 }
 
-/* NAV（中央揃え） */
-nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.93);backdrop-filter:blur(12px);border-bottom:.5px solid var(--border);padding:0 16px;transition:box-shadow .2s;}
-nav.scrolled{box-shadow:0 2px 14px rgba(0,0,0,.06);}
-.nav-top{display:flex;justify-content:center;padding:8px 0 4px;}
-.nav-brand{font-size:12px;font-weight:800;letter-spacing:.04em;white-space:nowrap;display:flex;align-items:center;gap:6px;}
-.nav-links{display:flex;justify-content:center;gap:0;overflow-x:auto;scrollbar-width:none;padding-bottom:6px;}
-.nav-links::-webkit-scrollbar{display:none;}
-.nav-btn{font-size:12px;padding:5px 12px;border-radius:var(--r);border:none;background:none;color:var(--text2);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
-.nav-btn:hover{background:var(--bg2);color:var(--text);}
-.nav-btn.active{background:var(--text);color:#fff;}
-@media(max-width:480px){ .nav-btn{font-size:12px;padding:5px 10px;} nav{padding:0 10px;} }
-
 /* PAGES */
 .page{display:none;}
 .page.active{display:block;animation:pageIn .28s ease both;}
@@ -481,7 +469,7 @@ details.kk-group[open] summary::after{content:"－";}
 
 /* ヘッダーのタブ間隔を詰める */
 .nav-btn{padding:5px 8px;}
-@media(max-width:480px){ .nav-btn{padding:5px 6px;} nav{padding:0 8px;} }
+
 .es-sub0{margin-top:0;}
 .es-dr-rank{font-size:16px;color:var(--text);}
 .es-dr-rank small{font-size:10px;color:var(--text2);margin-left:1px;}
