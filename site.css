@@ -783,3 +783,10 @@ img{display:block;max-width:100%;}
 }
 /* プロフィールは1列（上から順に、誕生日が一番下） */
 .pc-prof{grid-template-columns:minmax(0,1fr);max-width:560px;}
+/* 歴代ランキング：投手／野手の中を ★・能力・成績 の段に分ける */
+.es-rk-items{display:flex;flex-direction:column;gap:8px;}
+.es-rk-row{display:flex;align-items:flex-start;gap:10px;}
+.es-rk-lb{flex:0 0 40px;padding-top:7px;font-size:11px;font-weight:900;color:var(--gold,#b8962e);letter-spacing:.05em;}
+.es-rk-btns{display:flex;gap:6px;flex-wrap:wrap;min-width:0;}
+.es-rk-grp .es-rk-g{min-width:96px;}
+@media (max-width:600px){ .es-rk-row{gap:6px;} .es-rk-lb{flex-basis:30px;} .es-rk-grp .es-rk-g{flex:1;} }

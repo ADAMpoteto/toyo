@@ -1079,58 +1079,90 @@ const ES_BAT_NOTE = `${ES_BAT_MIN}打席以上の野手`, ES_PIT_NOTE = `投球�
 const esIsPit = g => g.pos==="投" || !!g.apt;
 const esCnt = u => v => `${v}<small>${u}</small>`;
 /* g: 総合／打撃／投手 */
+const esFld = g => !esIsPit(g);
+const esRkAb = v => `<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`;
+const esGoldN = g => (esSplitList(g.skills).filter(x=>esSkillClass(x).cls==="gold").length + Object.values(g.rk||{}).filter(v=>/^★/.test(v)).length)||null;
+/* 入学時→卒業時の伸び（能力シートに両方あるときだけ） */
+const esAbGrow = (g, keys) => { const a=(g.ab||{})["入学時"], b=(g.ab||{})["卒業時"]; if(!a||!b) return null;
+  let d=0, n=0; keys.forEach(k=>{ if(a[k]!=null && b[k]!=null){ d+=b[k]-a[k]; n++; } }); return n ? d : null; };
+const ES_FBASE = ["meet","pow","run","arm","fld","catch_"];
+const esFBaseSum = g => { const v=ES_FBASE.map(k=>g[k]).filter(x=>x!=null); return v.length>=5 ? v.reduce((a,b)=>a+b,0) : null; };
+const esBrk = g => (g.pitches||[]).filter(p=>p.dir!=="UP");
+const esSkN = g => (esSplitList(g.skills).filter(x=>esSkillClass(x).cls!=="red").length + Object.values(g.rk||{}).filter(v=>/^★/.test(v)).length)||null;
+const esPlus = v => `${v>0?"+":""}${v}`;
+/* g: 投手／野手、s: ★／能力／成績（タブの中の段） */
 const ES_RK=[
-  {g:"総合", k:"star", t:"卒業時★", get:g=>g.star, fmt:v=>v},
-  {g:"総合", k:"star0",t:"入学時★", get:g=>g.transfer?null:g.star0, fmt:v=>v, note:"新入生として入学した選手だけ（転校生は「転校生★」で別に並べる）"},
-  {g:"総合", k:"trans",t:"転校生★", get:g=>g.transfer?g.star0:null, fmt:v=>v, note:"転校してきた時点の★（卒業生シートの入学時★）"},
-  {g:"総合", k:"grow", t:"★の伸び", get:g=>g.grow, fmt:v=>`+${v}`},
-  {g:"総合", k:"games",t:"出場試合", get:g=>g.games||null, fmt:esCnt("試合")},
-  {g:"能力", k:"velo", t:"球速", get:g=>esIsPit(g)&&g.velo||null, fmt:v=>`${v}<small>km/h</small>`},
-  {g:"能力", k:"ctl",  t:"コントロール", get:g=>esIsPit(g)&&g.ctl||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"sta",  t:"スタミナ", get:g=>esIsPit(g)&&g.sta||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"meet", t:"ミート", get:g=>g.meet||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"pow",  t:"パワー", get:g=>g.pow||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"run",  t:"走力", get:g=>g.run||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"arm",  t:"肩力", get:g=>g.arm||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"fld",  t:"守備力", get:g=>g.fld||null, fmt:v=>`<span class="es-ab-r rk-${esRankOf(v)} in">${esRankOf(v)}</span>${v}`},
-  {g:"能力", k:"gold", t:"金特の数", get:g=>(esSplitList(g.skills).filter(x=>esSkillClass(x).cls==="gold").length + Object.values(g.rk||{}).filter(v=>/^★/.test(v)).length)||null, fmt:esCnt("個")},
-  {g:"打撃", k:"mvpB", t:"打撃MVP", get:g=>g.mvpB||null, fmt:esCnt("回"), note:"試合ごとの打撃MVPに選ばれた回数。打席の中身を得点の価値で数え、チームの得点に絡んだ割合（接戦ほど重く）を足して選ぶ"},
-  {g:"打撃", k:"avg",  t:"打率", get:g=>esBatQ(g)?g.avg:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
-  {g:"打撃", k:"ops",  t:"OPS", get:g=>esBatQ(g)?g.ops:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
-  {g:"打撃", k:"obp",  t:"出塁率", get:g=>esBatQ(g)?g.obp:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
-  {g:"打撃", k:"slg",  t:"長打率", get:g=>esBatQ(g)?g.slg:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
-  {g:"打撃", k:"h",    t:"安打", get:g=>g.h||null, fmt:esCnt("本")},
-  {g:"打撃", k:"hr",   t:"本塁打", get:g=>g.hr||null, fmt:esCnt("本")},
-  {g:"打撃", k:"d2",   t:"二塁打", get:g=>g.d2||null, fmt:esCnt("本")},
-  {g:"打撃", k:"d3",   t:"三塁打", get:g=>g.d3||null, fmt:esCnt("本")},
-  {g:"打撃", k:"rbi",  t:"打点", get:g=>g.rbi||null, fmt:esCnt("点")},
-  {g:"打撃", k:"r",    t:"得点", get:g=>g.r||null, fmt:esCnt("点")},
-  {g:"打撃", k:"sb",   t:"盗塁", get:g=>g.sb||null, fmt:esCnt("個")},
-  {g:"打撃", k:"bbb",  t:"四死球", get:g=>g.bbb||null, fmt:esCnt("個")},
-  {g:"打撃", k:"sh",   t:"犠打", get:g=>g.sh||null, fmt:esCnt("個")},
-  {g:"投手", k:"mvpP", t:"投手MVP", get:g=>g.mvpP||null, fmt:esCnt("回"), note:"試合ごとの投手MVPに選ばれた回数。平均的な投手と比べて何点防いだかに、奪三振と接戦での勝ち・セーブを足して選ぶ"},
-  {g:"投手", k:"era",  t:"防御率", get:g=>g.pitQual?g.era:null, fmt:v=>v.toFixed(2), asc:true, note:ES_PIT_NOTE},
-  {g:"投手", k:"whip", t:"WHIP", get:g=>g.pitQual?g.whip:null, fmt:v=>v.toFixed(2), asc:true, note:`1イニングあたりに出した走者（被安打＋与四死球）。${ES_PIT_NOTE}`},
-  {g:"投手", k:"k9",   t:"奪三振率", get:g=>g.pitQual?g.k9:null, fmt:v=>v.toFixed(2), note:`9イニングあたりの奪三振。${ES_PIT_NOTE}`},
-  {g:"投手", k:"w",    t:"勝利", get:g=>g.w||null, fmt:esCnt("勝")},
-  {g:"投手", k:"k",    t:"奪三振", get:g=>g.k||null, fmt:esCnt("個")},
-  {g:"投手", k:"ip",   t:"投球回", get:g=>g.ip||null, fmt:v=>esIPfmt(v)},
-  {g:"投手", k:"cg",   t:"完投", get:g=>g.cg||null, fmt:esCnt("回")},
-  {g:"投手", k:"sho",  t:"完封", get:g=>g.sho||null, fmt:esCnt("回")},
-  {g:"投手", k:"nh",   t:"ノーノー", get:g=>g.nh||null, fmt:esCnt("回")},
-  {g:"投手", k:"hd",   t:"ホールド", get:g=>g.hd||null, fmt:esCnt("H")},
-  {g:"投手", k:"sv",   t:"セーブ", get:g=>g.sv||null, fmt:esCnt("S")},
-  {g:"投手", k:"app",  t:"登板", get:g=>g.app||null, fmt:esCnt("試合")}
+  {g:"投手", s:"★", k:"pStar",  t:"卒業時★", get:g=>esIsPit(g)?g.star:null, fmt:v=>v},
+  {g:"投手", s:"★", k:"pStar0", t:"入学時★", get:g=>esIsPit(g)&&!g.transfer?g.star0:null, fmt:v=>v, note:"新入生として入学した選手だけ（転校生は「転校生★」で別に並べる）"},
+  {g:"投手", s:"★", k:"pTrans", t:"転校生★", get:g=>esIsPit(g)&&g.transfer?g.star0:null, fmt:v=>v, note:"転校してきた時点の★（卒業生シートの入学時★）"},
+  {g:"投手", s:"★", k:"pGrow",  t:"★の伸び", get:g=>esIsPit(g)?g.grow:null, fmt:v=>`+${v}`},
+  {g:"投手", s:"能力", k:"velo", t:"球速", get:g=>esIsPit(g)&&g.velo||null, fmt:v=>`${v}<small>km/h</small>`},
+  {g:"投手", s:"能力", k:"ctl",  t:"コントロール", get:g=>esIsPit(g)&&g.ctl||null, fmt:esRkAb},
+  {g:"投手", s:"能力", k:"sta",  t:"スタミナ", get:g=>esIsPit(g)&&g.sta||null, fmt:esRkAb},
+  {g:"投手", s:"能力", k:"pGold", t:"金特の数", get:g=>esIsPit(g)?esGoldN(g):null, fmt:esCnt("個")},
+  {g:"投手", s:"能力", k:"pSk",   t:"特殊能力の数", get:g=>esIsPit(g)?esSkN(g):null, fmt:esCnt("個"), note:"金特・青特・緑特の数（赤特と、A〜Gのランクで付く能力は数えない）"},
+  {g:"投手", s:"能力", k:"brk",   t:"総変化量", get:g=>esIsPit(g)?(esBrk(g).reduce((a,p)=>a+(p.lv||0),0)||null):null, fmt:v=>v, note:"変化球の変化量の合計"},
+  {g:"投手", s:"能力", k:"brkN",  t:"球種の数", get:g=>esIsPit(g)?((g.pitches||[]).length||null):null, fmt:esCnt("球種"), note:"変化球＋第2ストレート"},
+  {g:"投手", s:"能力", k:"veloG", t:"球速の伸び", get:g=>esIsPit(g)?esAbGrow(g,["velo"]):null, fmt:v=>`${esPlus(v)}<small>km/h</small>`, note:"入学時から卒業時まで（能力シートに両方ある選手）"},
+  {g:"投手", s:"能力", k:"pAbG",  t:"コン・スタの伸び", get:g=>esIsPit(g)?esAbGrow(g,["ctl","sta"]):null, fmt:esPlus, note:"コントロールとスタミナの伸びの合計（入学時→卒業時）"},
+  {g:"投手", s:"成績", k:"mvpP", t:"投手MVP", get:g=>g.mvpP||null, fmt:esCnt("回"), note:"試合ごとの投手MVPに選ばれた回数。平均的な投手と比べて何点防いだかに、奪三振と接戦での勝ち・セーブを足して選ぶ"},
+  {g:"投手", s:"成績", k:"era",  t:"防御率", get:g=>g.pitQual?g.era:null, fmt:v=>v.toFixed(2), asc:true, note:ES_PIT_NOTE},
+  {g:"投手", s:"成績", k:"whip", t:"WHIP", get:g=>g.pitQual?g.whip:null, fmt:v=>v.toFixed(2), asc:true, note:`1イニングあたりに出した走者（被安打＋与四死球）。${ES_PIT_NOTE}`},
+  {g:"投手", s:"成績", k:"k9",   t:"奪三振率", get:g=>g.pitQual?g.k9:null, fmt:v=>v.toFixed(2), note:`9イニングあたりの奪三振。${ES_PIT_NOTE}`},
+  {g:"投手", s:"成績", k:"w",    t:"勝利", get:g=>g.w||null, fmt:esCnt("勝")},
+  {g:"投手", s:"成績", k:"wpct", t:"勝率", get:g=>(g.w||0)+(g.l||0)>=5 ? g.w/((g.w||0)+(g.l||0)) : null, fmt:esAvgFmt, note:"勝ち＋負けが5以上の投手"},
+  {g:"投手", s:"成績", k:"gs",   t:"先発", get:g=>g.gs||null, fmt:esCnt("試合")},
+  {g:"投手", s:"成績", k:"k",    t:"奪三振", get:g=>g.k||null, fmt:esCnt("個")},
+  {g:"投手", s:"成績", k:"ip",   t:"投球回", get:g=>g.ip||null, fmt:v=>esIPfmt(v)},
+  {g:"投手", s:"成績", k:"app",  t:"登板", get:g=>g.app||null, fmt:esCnt("試合")},
+  {g:"投手", s:"成績", k:"cg",   t:"完投", get:g=>g.cg||null, fmt:esCnt("回")},
+  {g:"投手", s:"成績", k:"sho",  t:"完封", get:g=>g.sho||null, fmt:esCnt("回")},
+  {g:"投手", s:"成績", k:"nh",   t:"ノーノー", get:g=>g.nh||null, fmt:esCnt("回")},
+  {g:"投手", s:"成績", k:"hd",   t:"ホールド", get:g=>g.hd||null, fmt:esCnt("H")},
+  {g:"投手", s:"成績", k:"sv",   t:"セーブ", get:g=>g.sv||null, fmt:esCnt("S")},
+  {g:"野手", s:"★", k:"fStar",  t:"卒業時★", get:g=>esFld(g)?g.star:null, fmt:v=>v},
+  {g:"野手", s:"★", k:"fStar0", t:"入学時★", get:g=>esFld(g)&&!g.transfer?g.star0:null, fmt:v=>v, note:"新入生として入学した選手だけ（転校生は「転校生★」で別に並べる）"},
+  {g:"野手", s:"★", k:"fTrans", t:"転校生★", get:g=>esFld(g)&&g.transfer?g.star0:null, fmt:v=>v, note:"転校してきた時点の★（卒業生シートの入学時★）"},
+  {g:"野手", s:"★", k:"fGrow",  t:"★の伸び", get:g=>esFld(g)?g.grow:null, fmt:v=>`+${v}`},
+  {g:"野手", s:"能力", k:"meet", t:"ミート", get:g=>esFld(g)&&g.meet||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"pow",  t:"パワー", get:g=>esFld(g)&&g.pow||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"run",  t:"走力", get:g=>esFld(g)&&g.run||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"arm",  t:"肩力", get:g=>esFld(g)&&g.arm||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"fld",  t:"守備力", get:g=>esFld(g)&&g.fld||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"catch", t:"捕球", get:g=>esFld(g)&&g.catch_||null, fmt:esRkAb},
+  {g:"野手", s:"能力", k:"fGold", t:"金特の数", get:g=>esFld(g)?esGoldN(g):null, fmt:esCnt("個")},
+  {g:"野手", s:"能力", k:"fSk",   t:"特殊能力の数", get:g=>esFld(g)?esSkN(g):null, fmt:esCnt("個"), note:"金特・青特・緑特の数（赤特と、A〜Gのランクで付く能力は数えない）"},
+  {g:"野手", s:"能力", k:"fSum",  t:"基礎能力の合計", get:g=>esFld(g)?esFBaseSum(g):null, fmt:v=>v, note:"ミート・パワー・走力・肩力・守備力・捕球の合計"},
+  {g:"野手", s:"能力", k:"fAbG",  t:"基礎能力の伸び", get:g=>esFld(g)?esAbGrow(g,ES_FBASE):null, fmt:esPlus, note:"ミート・パワー・走力・肩力・守備力・捕球の伸びの合計（入学時→卒業時）"},
+  {g:"野手", s:"成績", k:"mvpB", t:"打撃MVP", get:g=>g.mvpB||null, fmt:esCnt("回"), note:"試合ごとの打撃MVPに選ばれた回数。打席の中身を得点の価値で数え、チームの得点に絡んだ割合（接戦ほど重く）を足して選ぶ"},
+  {g:"野手", s:"成績", k:"games",t:"出場試合", get:g=>esFld(g)&&g.games||null, fmt:esCnt("試合")},
+  {g:"野手", s:"成績", k:"pa",   t:"打席", get:g=>esFld(g)&&g.pa||null, fmt:esCnt("打席")},
+  {g:"野手", s:"成績", k:"avg",  t:"打率", get:g=>esBatQ(g)?g.avg:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
+  {g:"野手", s:"成績", k:"ops",  t:"OPS", get:g=>esBatQ(g)?g.ops:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
+  {g:"野手", s:"成績", k:"obp",  t:"出塁率", get:g=>esBatQ(g)?g.obp:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
+  {g:"野手", s:"成績", k:"slg",  t:"長打率", get:g=>esBatQ(g)?g.slg:null, fmt:esAvgFmt, note:ES_BAT_NOTE},
+  {g:"野手", s:"成績", k:"h",    t:"安打", get:g=>g.h||null, fmt:esCnt("本")},
+  {g:"野手", s:"成績", k:"tb",   t:"塁打", get:g=>g.h!=null ? (g.h+(g.d2||0)+(g.d3||0)*2+(g.hr||0)*3)||null : null, fmt:esCnt("塁打")},
+  {g:"野手", s:"成績", k:"xbh",  t:"長打", get:g=>((g.d2||0)+(g.d3||0)+(g.hr||0))||null, fmt:esCnt("本"), note:"二塁打＋三塁打＋本塁打"},
+  {g:"野手", s:"成績", k:"hr",   t:"本塁打", get:g=>g.hr||null, fmt:esCnt("本")},
+  {g:"野手", s:"成績", k:"d2",   t:"二塁打", get:g=>g.d2||null, fmt:esCnt("本")},
+  {g:"野手", s:"成績", k:"d3",   t:"三塁打", get:g=>g.d3||null, fmt:esCnt("本")},
+  {g:"野手", s:"成績", k:"rbi",  t:"打点", get:g=>g.rbi||null, fmt:esCnt("点")},
+  {g:"野手", s:"成績", k:"r",    t:"得点", get:g=>g.r||null, fmt:esCnt("点")},
+  {g:"野手", s:"成績", k:"sb",   t:"盗塁", get:g=>g.sb||null, fmt:esCnt("個")},
+  {g:"野手", s:"成績", k:"bbb",  t:"四死球", get:g=>g.bbb||null, fmt:esCnt("個")},
+  {g:"野手", s:"成績", k:"sh",   t:"犠打", get:g=>g.sh||null, fmt:esCnt("個")}
 ];
 function esRenderRkTabs(){
   const avail=ES_RK.filter(r=>ES.grads.some(g=>r.get(g)!=null));
   if(!avail.some(r=>r.k===ES.rk)) ES.rk=(avail[0]||{}).k;
-  const cur=avail.find(r=>r.k===ES.rk), grp=cur?cur.g:"総合";
-  const groups=["総合","打撃","投手","能力"].filter(x=>avail.some(r=>r.g===x));
+  const cur=avail.find(r=>r.k===ES.rk), grp=cur?cur.g:"投手";
+  const groups=["投手","野手"].filter(x=>avail.some(r=>r.g===x));
   const box=document.getElementById("es-rk-tabs");
   box.classList.add("es-rk-tabbox");
+  const rows=["★","能力","成績"].map(sub=>{ const L=avail.filter(r=>r.g===grp && r.s===sub); return L.length?`<div class="es-rk-row"><span class="es-rk-lb">${sub}</span><div class="es-rk-btns">${L.map(r=>`<button type="button" class="day-tab${r.k===ES.rk?" active":""}" data-k="${r.k}">${r.t}</button>`).join("")}</div></div>`:""; }).join("");
   box.innerHTML=`<div class="es-rk-grp">${groups.map(x=>`<button type="button" class="es-rk-g${x===grp?" active":""}" data-g="${x}">${x}</button>`).join("")}</div>
-    <div class="es-rk-items">${avail.filter(r=>r.g===grp).map(r=>`<button type="button" class="day-tab${r.k===ES.rk?" active":""}" data-k="${r.k}">${r.t}</button>`).join("")}</div>`;
+    <div class="es-rk-items">${rows}</div>`;
   box.querySelectorAll(".es-rk-g").forEach(b=>b.onclick=()=>{
     ES.rk=avail.find(r=>r.g===b.dataset.g).k; esRenderRkTabs(); esRenderRk();
   });
