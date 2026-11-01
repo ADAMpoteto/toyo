@@ -1153,37 +1153,43 @@ const ES_RK=[
   {g:"野手", s:"成績", k:"bbb",  t:"四死球", get:g=>g.bbb||null, fmt:esCnt("個")},
   {g:"野手", s:"成績", k:"sh",   t:"犠打", get:g=>g.sh||null, fmt:esCnt("個")}
 ];
-/* 歴代ランキング：投手／野手のタブ＋項目のセレクトボックス（★・能力・成績でグループ分け）→ TOP10 */
-ES.rkK = ES.rkK || {};
+/* 歴代ランキング：投手／野手 → ★・能力・成績 のタブ。各項目は上位3人のカードで並べ、タップでTOP10まで開く */
+ES.rkG = ES.rkG || "投手"; ES.rkS = ES.rkS || "★"; ES.rkOpen = ES.rkOpen || {};
 function esRkList(R){ return ES.grads.filter(g=>R.get(g)!=null).sort((a,b)=>R.asc?R.get(a)-R.get(b):R.get(b)-R.get(a)).slice(0,10); }
 function esRenderRkTabs(){
   const avail=ES_RK.filter(r=>ES.grads.some(g=>r.get(g)!=null));
   const groups=["投手","野手"].filter(x=>avail.some(r=>r.g===x));
   if(!groups.includes(ES.rkG)) ES.rkG=groups[0]||"投手";
-  const mine=avail.filter(r=>r.g===ES.rkG);
-  if(!mine.some(r=>r.k===ES.rkK[ES.rkG])) ES.rkK[ES.rkG]=(mine[0]||{}).k;
+  const subs=["★","能力","成績"].filter(x=>avail.some(r=>r.g===ES.rkG && r.s===x));
+  if(!subs.includes(ES.rkS)) ES.rkS=subs[0]||"★";
   const box=document.getElementById("es-rk-tabs");
   box.className="es-rk-tabbox";
-  const opt=["★","能力","成績"].map(sub=>{ const L=mine.filter(r=>r.s===sub); return L.length?`<optgroup label="${sub==="★"?"★・成長":sub}">${L.map(r=>`<option value="${r.k}"${r.k===ES.rkK[ES.rkG]?" selected":""}>${r.t}</option>`).join("")}</optgroup>`:""; }).join("");
   box.innerHTML=`<div class="es-rk-grp">${groups.map(x=>`<button type="button" class="es-rk-g${x===ES.rkG?" active":""}" data-g="${x}">${x}</button>`).join("")}</div>
-    <div class="t-rksel"><label for="es-rk-sel">ランキング</label><div class="t-selw"><select id="es-rk-sel">${opt}</select></div></div>`;
+    <div class="t-seg">${subs.map(x=>`<button type="button" class="${x===ES.rkS?"on":""}" data-s="${x}">${x==="★"?"★・成長":x}<small>${avail.filter(r=>r.g===ES.rkG&&r.s===x).length}</small></button>`).join("")}</div>`;
   box.querySelectorAll(".es-rk-g").forEach(b=>b.onclick=()=>{ ES.rkG=b.dataset.g; esRenderRkTabs(); esRenderRk(); });
-  $id("es-rk-sel").onchange=e=>{ ES.rkK[ES.rkG]=e.target.value; esRenderRk(); };
+  box.querySelectorAll(".t-seg button").forEach(b=>b.onclick=()=>{ ES.rkS=b.dataset.s; esRenderRkTabs(); esRenderRk(); });
 }
 function esRenderRk(){
   const el=document.getElementById("es-rk");
-  const R=ES_RK.find(r=>r.k===ES.rkK[ES.rkG]);
-  if(!R){ el.innerHTML=errBox("まだ卒業生の記録がありません。"); return; }
-  const P=esRkList(R);
-  const rkNo=P.map((g,i)=>i); P.forEach((g,i)=>{ if(i && R.get(g)===R.get(P[i-1])) rkNo[i]=rkNo[i-1]; });
-  el.className="t-rkl";
-  el.innerHTML=`<h4 class="t-rkl-h"><span>${ES.rkG}</span>${R.t}<small>TOP${P.length}</small></h4>`+P.map((g,i)=>`
-    <a class="t-rkr${rkNo[i]===0?" top":""}" href="${tyPHref(g)}">
-      <span class="t-rkr-n en">${rkNo[i]+1}</span>
-      <span class="t-rkr-m"><b>${escHtml(g.name)}<span class="es-pos sm ${esPosCls(g.pos)}">${escHtml(g.pos)}</span>${esTags(g)}</b><small>${escHtml(esGradMeta(g))}</small></span>
-      <span class="t-rkr-v en">${R.fmt(R.get(g))}</span>
-    </a>`).join("");
-  document.getElementById("es-rk-note").textContent=[R.note, "名前をタップすると選手ページが開きます。"].filter(Boolean).join("　");
+  const L=ES_RK.filter(r=>r.g===ES.rkG && r.s===ES.rkS && ES.grads.some(g=>r.get(g)!=null));
+  if(!L.length){ el.innerHTML=errBox("まだ卒業生の記録がありません。"); return; }
+  el.className="t-ldr";
+  el.innerHTML=L.map(R=>{
+    const P=esRkList(R), open=!!ES.rkOpen[R.k], show=open?P:P.slice(0,3);
+    const top=P[0];
+    /* 同じ値は同じ順位 */
+    const rkNo=P.map((g,i)=>i); P.forEach((g,i)=>{ if(i && R.get(g)===R.get(P[i-1])) rkNo[i]=rkNo[i-1]; });
+    return `<article class="t-lc${open?" open":""}" data-k="${R.k}">
+      <header><h4>${R.t}</h4>${R.note?`<button type="button" class="t-lc-i" aria-label="説明" title="${escHtml(R.note)}">?</button>`:""}</header>
+      ${R.note?`<p class="t-lc-note" hidden>${escHtml(R.note)}</p>`:""}
+      <a class="t-lc-top" href="${tyPHref(top)}"><span class="t-lc-rk en">1</span><span class="t-lc-nm"><b>${escHtml(top.name)}</b><small>${escHtml([top.year?`${top.year}年度入学`:"", top.pos].filter(Boolean).join("・"))}</small></span><span class="t-lc-v en">${R.fmt(R.get(top))}</span></a>
+      <ol class="t-lc-ol" start="2">${show.slice(1).map((g,i)=>`<li><a href="${tyPHref(g)}"><span class="t-lc-rk en">${rkNo[i+1]+1}</span><span class="t-lc-nm">${escHtml(g.name)}</span><span class="t-lc-v en">${R.fmt(R.get(g))}</span></a></li>`).join("")}</ol>
+      ${P.length>3?`<button type="button" class="t-lc-more">${open?"閉じる":"TOP10を見る"}</button>`:""}
+    </article>`;
+  }).join("");
+  el.querySelectorAll(".t-lc-more").forEach(b=>b.onclick=()=>{ const k=b.closest(".t-lc").dataset.k; ES.rkOpen[k]=!ES.rkOpen[k]; esRenderRk(); });
+  el.querySelectorAll(".t-lc-i").forEach(b=>b.onclick=()=>{ const n=b.closest(".t-lc").querySelector(".t-lc-note"); n.hidden=!n.hidden; });
+  document.getElementById("es-rk-note").textContent="名前をタップすると選手ページが開きます。";
 }
 
 /* ---------- 記録 ---------- */
