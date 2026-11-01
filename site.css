@@ -846,3 +846,8 @@ img{display:block;max-width:100%;}
   .t-lc.open .t-lc-top .t-lc-v{flex:0 0 auto;}
   .t-lc.open .t-lc-top .t-lc-nm small{display:block;}
 }
+/* 歴代ランキング：投手／野手の中のタブ（総合・投球/打撃・能力） */
+.es-rk-sub{display:flex;gap:18px;margin:0 0 12px;padding:0 2px;border-bottom:1px solid var(--line);}
+.es-rk-sub button{border:0;background:none;padding:6px 2px 8px;font-size:14px;font-weight:900;color:var(--ink3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;}
+.es-rk-sub button.on{color:var(--navy);border-bottom-color:var(--gold);}
+.es-rk-sub button:hover{color:var(--navy);}
