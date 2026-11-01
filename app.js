@@ -303,12 +303,10 @@ function esRenderYears(){
         ${ES_TAIKAI.map(t=>{ const r=Y.res[t.k]; return `<td data-l="${t.s}"${r?"":' class="nil"'}>${r?`<span class="es-res ${esBadgeCls(r)}">${escHtml(r)}</span>`:`<span class="es-none">－</span>`}</td>`; }).join("")}
         <td class="es-wl">${Y.w}-${Y.l}</td>
       </tr>`).join("")}</tbody></table></div>
-    <p class="kk-note-s">${ES.decade}年代：${D.length}年度・優勝 ${v} 回。年度をタップすると下に詳しい記録が出ます</p>`;
+    <p class="kk-note-s">${ES.decade}年代：${D.length}年度・優勝 ${v} 回。年度をタップすると「年度の記録」が開きます</p>`;
   el.querySelectorAll("#es-dec .day-tab").forEach(b=>b.onclick=()=>{ ES.decade=+b.dataset.d; esRenderYears(); });
   el.querySelectorAll("tbody tr").forEach(tr=>{
-    const go=()=>{ esShowYear(+tr.dataset.y);
-      const a=document.getElementById("es-year-anchor"), nav=document.getElementById("hd");
-      window.scrollTo({ top:Math.max(0, window.scrollY+a.getBoundingClientRect().top-(nav?nav.offsetHeight:0)-8), behavior:prefersReduced()?"auto":"smooth" }); };
+    const go=()=>{ esShowYear(+tr.dataset.y); location.hash="#year/detail"; };
     tr.addEventListener("click", go);
     tr.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
   });
@@ -1660,7 +1658,7 @@ function tyHome(){
       <div class="mboard"><div class="mteam">${tyCrest()}東洋大姫路</div><div class="mscore">${last.rs}-${last.ra}</div><div class="mteam">${tyOppMark(last.opp)}${escHtml(last.opp)}<small>${escHtml(last.oppPref||"")}</small></div></div>
       <div class="mres"><span class="res ${last.wl==="勝"?"W":last.wl==="負"?"L":"D"}">${last.wl==="勝"?"WIN":last.wl==="負"?"LOSE":"DRAW"}</span></div>
       ${M.bat||M.pit?`<div class="t-mvpline">${M.bat?`<span>打撃MVP ${tyNameLink(M.bat.name,last.year)}</span>`:""}${M.pit?`<span>投手MVP ${tyNameLink(M.pit.name,last.year)}</span>`:""}</div>`:""}
-    </div><div class="mlinks"><a href="#year">年度の記録</a><a href="#rec">記録</a></div></div>`; })() : "";
+    </div><div class="mlinks"><a href="#year/detail">年度の記録</a><a href="#rec">記録</a></div></div>`; })() : "";
   const yBox = Y ? `<div class="mbox"><div class="mbox-h"><b>SEASON ${Y.y}</b><span>${Y.w}勝${Y.l}敗</span></div><div class="mbox-b t-ylist">
       ${ES_TAIKAI.map(x=>{ const r=Y.res[x.k]; return `<div class="t-yrow"><span>${escHtml(x.k)}</span>${r?`<span class="es-res ${esBadgeCls(r)}">${escHtml(r)}</span>`:`<span class="es-none">－</span>`}</div>`; }).join("")}
     </div><div class="mlinks"><a href="#year">年度別成績</a></div></div>` : "";
@@ -1672,7 +1670,7 @@ function tyHome(){
     </div></section>
     ${bdToday.length?`<section class="t-hbd"><div class="t-hbd-in"><b class="en">HAPPY BIRTHDAY</b><span>今日は ${bdToday.map(x=>`${tyPLink(x.g)}（${escHtml(tyWho(x.g))}）`).join("・")} の誕生日！</span></div></section>`:""}
     <section class="match-band"><div class="wrap">
-      ${tySecH("RESULT","試合結果","#year")}
+      ${tySecH("RESULT","試合結果","#year/detail")}
       <div class="mgrid">${lastBox}${yBox}</div>
       <div class="season-strip">
         <div><span>通算成績</span><b>${nf(W)}<small>勝</small>${nf(L)}<small>敗</small></b></div>
@@ -1683,7 +1681,7 @@ function tyHome(){
     </div></section>
     <div class="wrap">
       <section class="sec">${tySecH("NEWS","ニュース","#news")}<div class="ngrid">${N.slice(0,8).map(tyNCard).join("")||`<div class="t-empty">まだニュースはありません。</div>`}</div></section>
-      <section class="sec">${tySecH("BIRTHDAY",`${t.getMonth()+1}月の誕生日`,"#player")}${tyBdayHtml(t.getMonth()+1, false)}</section>
+      <section class="sec">${tySecH("BIRTHDAY",`${t.getMonth()+1}月の誕生日`,"#player/bday")}${tyBdayHtml(t.getMonth()+1, false)}</section>
     </div>`;
   tySlider();
 }
@@ -1754,7 +1752,7 @@ function tyPlayerPage(arg){
 /* ---------- PLAYERSページに誕生日の欄を足す ---------- */
 function tyBdaySection(){
   let sec=$id("ty-bday");
-  if(!sec){ sec=document.createElement("div"); sec.className="card-section"; sec.id="ty-bday"; }
+  if(!sec){ sec=document.createElement("div"); sec.className="card-section"; sec.id="ty-bday"; sec.dataset.sub="bday"; sec.dataset.subT="誕生日"; }
   const host=document.querySelector('.es-pane[data-pane="player"] .wrap');
   if(host.lastElementChild!==sec) host.appendChild(sec); /* 誕生日はページの一番下 */
   const now=new Date().getMonth()+1;
@@ -1764,6 +1762,15 @@ function tyBdaySection(){
   sec.querySelectorAll(".t-mtabs .day-tab").forEach(b=>b.onclick=()=>{ TY.bdM=+b.dataset.m; tyBdaySection(); });
 }
 
+/* ---------- ページ内のタブ（SEASON・PLAYERS・RECORDS は中身ごとに分けて1つずつ見せる） ---------- */
+function tySubnav(page, arg){
+  const pane=document.querySelector(`.es-pane[data-pane="${page}"]`); if(!pane) return;
+  const nav=pane.querySelector(".t-subnav"); if(!nav) return;
+  const S=[...pane.querySelectorAll("[data-sub]")];
+  const keys=S.map(x=>x.dataset.sub), cur=keys.includes(arg)?arg:keys[0];
+  nav.innerHTML=`<div class="t-subnav-in">${S.map(x=>`<a href="#${page}/${x.dataset.sub}"${x.dataset.sub===cur?' class="on" aria-current="page"':""}>${x.dataset.subT}</a>`).join("")}</div>`;
+  S.forEach(x=>x.hidden = x.dataset.sub!==cur);
+}
 /* ---------- ページの切り替え ---------- */
 function tyRoute(){
   const h=decodeURIComponent(location.hash.replace(/^#/,"")), [p, ...rest]=h.split("/");
@@ -1774,6 +1781,7 @@ function tyRoute(){
   if(page==="home") tyHome();
   if(page==="news") tyNewsPage(arg);
   if(page==="pl") tyPlayerPage(arg);
+  tySubnav(page, arg);
   tySetMenu(false);
   const go=()=>{ window.scrollTo(0,0); document.documentElement.scrollTop=0; };
   go(); requestAnimationFrame(go); setTimeout(go,60);

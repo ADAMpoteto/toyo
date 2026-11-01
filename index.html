@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,700;1,800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261101u4">
-<link rel="stylesheet" href="site.css?v=20261101u4">
+<link rel="stylesheet" href="style.css?v=20261101u5">
+<link rel="stylesheet" href="site.css?v=20261101u5">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
@@ -57,13 +57,14 @@
 
   <section class="es-pane" data-pane="year" hidden>
     <div class="ph-band" data-bg="SEASON"><div class="ph-in"><h1><b>SEASON</b><small>年度ごとの成績と試合の記録</small></h1></div></div>
+    <nav class="t-subnav" aria-label="ページ内のメニュー"></nav>
     <div class="wrap">
       <div class="hero" id="es-hero"><div class="t-loading">読み込み中…</div></div>
-      <div class="card-section">
+      <div class="card-section" data-sub="list" data-sub-t="年度別成績">
         <div class="sec-title">年度別成績</div>
         <div id="es-years"><div class="t-loading">読み込み中…</div></div>
       </div>
-      <div class="card-section" id="es-year-anchor">
+      <div class="card-section" id="es-year-anchor" data-sub="detail" data-sub-t="年度の記録">
         <div class="sec-title">年度の記録</div>
         <div class="trip-selbox"><select id="es-year-sel" aria-label="年度を選ぶ"><option>読み込み中…</option></select></div>
         <div id="es-year"></div>
@@ -72,21 +73,22 @@
   </section>
 
   <section class="es-pane" data-pane="player" hidden>
-    <div class="ph-band" data-bg="PLAYERS"><div class="ph-in"><h1><b>PLAYERS</b><small>選手名鑑・歴代ベスト9・ランキング</small></h1></div></div>
+    <div class="ph-band" data-bg="PLAYERS"><div class="ph-in"><h1><b>PLAYERS</b><small>選手名鑑・歴代ベスト9・ランキング・誕生日</small></h1></div></div>
+    <nav class="t-subnav" aria-label="ページ内のメニュー"></nav>
     <div class="wrap">
-      <div class="card-section">
+      <div class="card-section" data-sub="roster" data-sub-t="選手名鑑">
         <div class="sec-title">選手名鑑</div>
         <div class="trip-selbox"><select id="es-roster-sel" aria-label="入学年度を選ぶ"></select></div>
         <div id="es-roster"></div>
       </div>
-      <div class="card-section">
+      <div class="card-section" data-sub="best9" data-sub-t="ベスト9">
         <div class="sec-title">歴代ベスト9</div>
         <div class="day-tabs" id="es-b9-tabs"></div>
         <div class="trip-selbox" id="es-b9-team" hidden><select id="es-team-sel" aria-label="球団を選ぶ"></select></div>
         <div id="es-b9"></div>
         <p class="kk-note-s" id="es-b9-note"></p>
       </div>
-      <div class="card-section">
+      <div class="card-section" data-sub="rank" data-sub-t="ランキング">
         <div class="sec-title">歴代ランキング TOP10</div>
         <div class="day-tabs" id="es-rk-tabs"></div>
         <div id="es-rk"></div>
@@ -97,13 +99,14 @@
 
   <section class="es-pane" data-pane="rec" hidden>
     <div class="ph-band" data-bg="RECORDS"><div class="ph-in"><h1><b>RECORDS</b><small>勝利数・連勝・チームの記録</small></h1></div></div>
+    <nav class="t-subnav" aria-label="ページ内のメニュー"></nav>
     <div class="wrap">
-      <div id="es-wins"></div>
-      <div class="card-section">
+      <div id="es-wins" data-sub="wins" data-sub-t="勝利・連勝"></div>
+      <div class="card-section" data-sub="team" data-sub-t="チームの記録">
         <div class="sec-title">チームの記録</div>
         <div id="es-records"></div>
       </div>
-      <div class="card-section">
+      <div class="card-section" data-sub="power" data-sub-t="戦力別">
         <div class="sec-title">相手の戦力別の成績</div>
         <div id="es-pw"></div>
       </div>
@@ -136,6 +139,6 @@
   </div>
 </footer>
 
-<script src="app.js?v=20261101u4"></script>
+<script src="app.js?v=20261101u5"></script>
 </body>
 </html>
