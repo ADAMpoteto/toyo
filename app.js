@@ -1345,7 +1345,7 @@ function esRenderDraft(){
       <div class="t-drs">${by[y].map(g=>{ const sur=String(g.name).split(/[\s　]+/)[0]; return `<a class="t-dr" href="#pl/${g.year||""}/${encodeURIComponent(g.name)}" style="--tc:${esTeamCol(g.team)}">
         <span class="t-dr-r">${g.rank?`${escHtml(g.rank)}<small>位</small>`:"-"}</span>
         <span class="face ph t-dr-f">${escHtml(sur)}</span>
-        <span class="t-dr-m"><b>${escHtml(g.name)}</b><span>${g.pos?`<span class="es-pos sm ${esPosCls(g.pos)}">${escHtml(g.pos)}</span>`:""}${escHtml([g.from, g.star!=null?`★${g.star}`:""].filter(Boolean).join("・"))}</span></span>
+        <span class="t-dr-m"><b>${escHtml(g.name)}</b><span>${g.pos?`<span class="es-pos sm ${esPosCls(g.pos)}">${escHtml(g.pos)}</span>`:""}${escHtml(g.from||"")}</span></span>
         <span class="t-dr-t">${escHtml(g.team)}</span></a>`; }).join("")}</div>`).join("") : errBox("該当する選手がいません。");
   };
   el.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>{
@@ -1380,8 +1380,9 @@ function tyCurYear(){
   const ys=[...ES.games.map(g=>g.year), ...ES.lineup.map(l=>l.year), ...ES.grads.map(g=>g.year).filter(Boolean)];
   return ys.length ? Math.max(...ys) : new Date().getFullYear();
 }
-/* 卒業した＝卒業時★・進路・球団のどれかが入っている */
-const tyDone = g => g.star!=null || !!g.course || !!g.team;
+/* 卒業した＝卒業時★が入っている（ドラフトの球団や進路が先に入っても、卒業式まではまだ在校生）。
+   ★が空欄でも、入学から3年以上たった年度なら卒業扱い */
+const tyDone = g => g.star!=null || (g.year!=null && tyCurYear()-g.year>=3);
 const tyGrade = g => { const n=tyCurYear()-g.year+1; return (!tyDone(g) && g.year!=null && n>=1 && n<=3) ? n : null; };
 
 /* ---------- 選手へのリンク ---------- */
@@ -1465,9 +1466,9 @@ function tyBuildNews(){
   Object.keys(cls).map(Number).forEach(y=>{
     const L=cls[y], fresh=L.filter(g=>!g.transfer);
     if(fresh.length && y<=cur) N.push({cat:"ENTRY", y, k:"入学式", ord:tyOrd("入学式"), L:fresh, title:`${y}年度 入学式 新入生${fresh.length}名が入部`});
-    const pro=L.filter(g=>g.team).sort((a,b)=>(+a.rank||99)-(+b.rank||99) || (b.star||0)-(a.star||0));
+    const pro=L.filter(g=>g.team).sort((a,b)=>(+a.rank||99)-(+b.rank||99));
     if(pro.length) N.push({cat:"DRAFT", y:y+2, k:"ドラフト", ord:tyOrd("ドラフト"), L:pro, title:tyDraftTitle(pro)});
-    const done=L.filter(tyDone);
+    const done=L.filter(g=>g.star!=null);   // 卒業式のニュースは卒業時★が入ってから
     if(done.length) N.push({cat:"GRAD", y:y+2, k:"卒業式", ord:tyOrd("卒業式"), L:done, title:`${y+2}年度 卒業式 ${done.length}名が巣立つ`});
   });
   /* 記録：通算勝利の節目、10連勝以上 */
@@ -1589,9 +1590,9 @@ function tyDraftTitle(pro){
 const tyCourse = g => g.team || g.course==="プロ野球選手" ? "プロ野球" : (g.course||"");
 /* 選手の表（入学式・ドラフト・卒業式） */
 function tyPlayerTable(L, mode){
-  const head = mode==="entry" ? ["守備","名前","出身","入学時★"] : mode==="draft" ? ["球団","順位","名前","守備","卒業時★"] : ["守備","名前","卒業時★","進路"];
+  const head = mode==="entry" ? ["守備","名前","出身","入学時★"] : mode==="draft" ? ["球団","順位","名前","守備"] : ["守備","名前","卒業時★","進路"];
   const row = g => mode==="entry" ? [esPosTag(g.pos0||g.pos), `${tyPLink(g)}${g.scout?`<span class="es-tag">スカウト</span>`:""}`, escHtml(g.from||""), g.star0??"-"]
-    : mode==="draft" ? [escHtml(g.team), g.rank?`${escHtml(g.rank)}位`:"-", tyPLink(g), esPosTag(g.pos), g.star??"-"]
+    : mode==="draft" ? [escHtml(g.team), g.rank?`${escHtml(g.rank)}位`:"-", tyPLink(g), esPosTag(g.pos)]
     : [esPosTag(g.pos), tyPLink(g), g.star??"-", escHtml(tyCourse(g))];
   return `<div class="es-st-wrap"><table class="t-tbl"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${L.map(g=>`<tr>${row(g).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
