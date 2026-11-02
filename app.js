@@ -1465,9 +1465,8 @@ function tyBuildNews(){
   Object.keys(cls).map(Number).forEach(y=>{
     const L=cls[y], fresh=L.filter(g=>!g.transfer);
     if(fresh.length && y<=cur) N.push({cat:"ENTRY", y, k:"入学式", ord:tyOrd("入学式"), L:fresh, title:`${y}年度 入学式 新入生${fresh.length}名が入部`});
-    const pro=L.filter(g=>g.team).sort((a,b)=>(+a.rank||99)-(+b.rank||99));
-    if(pro.length) N.push({cat:"DRAFT", y:y+2, k:"ドラフト", ord:tyOrd("ドラフト"), L:pro,
-      title: pro.length===1 ? `${pro[0].name}が${pro[0].team}から${pro[0].rank?pro[0].rank+"位":""}指名` : `ドラフト会議で${pro.length}名が指名！ ${pro[0].name}は${pro[0].team}${pro[0].rank?pro[0].rank+"位":""}`});
+    const pro=L.filter(g=>g.team).sort((a,b)=>(+a.rank||99)-(+b.rank||99) || (b.star||0)-(a.star||0));
+    if(pro.length) N.push({cat:"DRAFT", y:y+2, k:"ドラフト", ord:tyOrd("ドラフト"), L:pro, title:tyDraftTitle(pro)});
     const done=L.filter(tyDone);
     if(done.length) N.push({cat:"GRAD", y:y+2, k:"卒業式", ord:tyOrd("卒業式"), L:done, title:`${y+2}年度 卒業式 ${done.length}名が巣立つ`});
   });
@@ -1496,13 +1495,22 @@ function tyVisual(n){
   if(n.cat==="RECORD") return `<div class="nv s"><div class="nv-sn">RECORD</div><div class="nv-sbig">${n.big}<small>${n.unit}</small></div>
       <div class="nv-stt"><span>${escHtml(n.unit==="勝"?"通算勝利":"連勝記録")}</span></div><div class="nv-date">${n.date}</div>${mark}</div>`;
   if(n.cat==="GRAD"){
-    /* 卒業証書のようなカード：プロ入り→★の高い順に5人まで */
-    const L=n.L.slice().sort((a,b)=>(b.team?1:0)-(a.team?1:0) || (b.star||0)-(a.star||0)).slice(0,4);
-    const pro=n.L.filter(g=>g.team).length;
+    /* 卒業証書のようなカード：★の高い順に4人まで（ドラフトの球団・順位はドラフトのニュースで出す） */
+    const L=n.L.slice().sort((a,b)=>(b.star||0)-(a.star||0)).slice(0,4);
     return `<div class="nv gd"><div class="nv-kind">GRADUATION<small>${n.y}年度 卒業式</small></div>
       <div class="nv-gbig">${n.L.length}<small>名が卒業</small></div>
-      <div class="nv-gsub">${pro?`プロ入り ${pro}名`:"それぞれの道へ"}</div>
-      <div class="nv-paper"><div class="nv-paper-h">卒業生</div>${L.map(g=>`<div class="nv-paper-r"><b>${escHtml(g.name)}</b><span>${escHtml(g.team?`${g.team}${g.rank?` ${g.rank}位`:""}`:(g.course||""))}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-paper-m">ほか${n.L.length-L.length}名</div>`:""}</div>
+      <div class="nv-gsub">それぞれの道へ</div>
+      <div class="nv-paper"><div class="nv-paper-h">卒業生</div>${L.map(g=>`<div class="nv-paper-r"><b>${escHtml(g.name)}</b><span>${g.star!=null?`★${g.star}`:""}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-paper-m">ほか${n.L.length-L.length}名</div>`:""}</div>
+      <div class="nv-date">${n.date}</div>${mark}</div>`;
+  }
+  if(n.cat==="DRAFT"){
+    /* 指名された選手を全員リストで（6人まで。7人以上は5人＋ほか） */
+    const L=n.L.length>6 ? n.L.slice(0,5) : n.L;
+    const r=n.L[0].rank, same=n.L.filter(g=>g.rank===r).length;
+    return `<div class="nv t dr dr2"><div class="nv-kind">DRAFT<small>${n.y}年度 ドラフト会議</small></div>
+      <div class="nv-gbig">${n.L.length}<small>名が指名</small></div>
+      ${r?`<div class="nv-gsub">${r}位指名 ${same}名</div>`:""}
+      <div class="nv-dlist"><div class="nv-dlist-h">指名選手</div>${L.map(g=>`<div class="nv-dlist-r"><span class="rk">${g.rank?`${escHtml(g.rank)}位`:"－"}</span><b>${escHtml(g.name)}</b><span class="tm">${escHtml(g.team)}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-dlist-m">ほか${n.L.length-L.length}名</div>`:""}</div>
       <div class="nv-date">${n.date}</div>${mark}</div>`;
   }
   /* 入学式・ドラフトは明るいカード */
@@ -1552,9 +1560,14 @@ function tyNewsBody(n){
     P.push(`<h2>指名された選手</h2>${tyPlayerTable(n.L, "draft")}`);
   }
   if(n.cat==="GRAD"){
-    const pro=n.L.filter(g=>g.team);
-    P.push(`<p>${n.y}年度の卒業式が行われ、${n.y-2}年度に入学した${n.L.length}名が卒業しました。${pro.length?`${pro.length}名はプロ野球へ進みます。`:""}</p>`);
-    P.push(`<h2>卒業生と進路</h2>${tyPlayerTable(n.L.slice().sort((a,b)=>(b.star||0)-(a.star||0)), "grad")}`);
+    /* 進路の内訳（プロ／大学／社会人…）。指名の球団・順位はドラフトのニュースへ */
+    const cnt={}; n.L.forEach(g=>{ const c=tyCourse(g); if(c) cnt[c]=(cnt[c]||0)+1; });
+    const top=n.L.slice().sort((a,b)=>(b.star||0)-(a.star||0))[0];
+    const dn=TY.news && TY.news.find(x=>x.cat==="DRAFT" && x.y===n.y);
+    P.push(`<p>${n.y}年度の卒業式が行われ、${n.y-2}年度に入学した${n.L.length}名が卒業しました。${top&&top.star!=null?`卒業時の★がいちばん高かったのは${tyPLink(top)}（★${top.star}）です。`:""}</p>`);
+    if(Object.keys(cnt).length) P.push(`<div class="t-chips t-chips-c">${Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="t-chip"><span>${escHtml(k)}</span><b>${v}<small>名</small></b></div>`).join("")}</div>`);
+    P.push(`<h2>卒業生</h2>${tyPlayerTable(n.L.slice().sort((a,b)=>(b.star||0)-(a.star||0)), "grad")}`);
+    if(dn) P.push(`<p class="nd-link"><a class="btn" href="#news/${dn.id}">この年のドラフト ›</a></p>`);
   }
   if(n.cat==="RECORD"){
     if(n.g) P.push(`<p>${escHtml(tyGameTxt(n.g))}の勝利で、通算<b>${n.big}勝</b>を達成しました。</p>`);
@@ -1564,12 +1577,22 @@ function tyNewsBody(n){
   }
   return P.join("");
 }
+/* ドラフトのタイトル。いちばん上の順位（ふつうは1位）が何人いても全員が分かるように */
+function tyDraftTitle(pro){
+  const r=pro[0].rank, same=pro.filter(g=>g.rank===r), rk=r?`${r}位`:"";
+  if(pro.length===1) return `${pro[0].name}が${pro[0].team}から${rk}指名`;
+  if(same.length===1) return `ドラフト会議で${pro.length}名が指名！ ${pro[0].name}は${pro[0].team}${rk}`;
+  const who = same.length<=3 ? same.map(g=>g.name).join("・") : `${same.length}名`;
+  return same.length===pro.length ? `${who}がドラフト${rk}指名！` : `ドラフト会議で${pro.length}名が指名！ ${who}が${rk}指名`;
+}
+/* 進路の呼び方（卒業式用。球団・順位はドラフトで出すので「プロ野球」にまとめる） */
+const tyCourse = g => g.team || g.course==="プロ野球選手" ? "プロ野球" : (g.course||"");
 /* 選手の表（入学式・ドラフト・卒業式） */
 function tyPlayerTable(L, mode){
   const head = mode==="entry" ? ["守備","名前","出身","入学時★"] : mode==="draft" ? ["球団","順位","名前","守備","卒業時★"] : ["守備","名前","卒業時★","進路"];
   const row = g => mode==="entry" ? [esPosTag(g.pos0||g.pos), `${tyPLink(g)}${g.scout?`<span class="es-tag">スカウト</span>`:""}`, escHtml(g.from||""), g.star0??"-"]
     : mode==="draft" ? [escHtml(g.team), g.rank?`${escHtml(g.rank)}位`:"-", tyPLink(g), esPosTag(g.pos), g.star??"-"]
-    : [esPosTag(g.pos), tyPLink(g), g.star??"-", escHtml(g.team?`${g.team}${g.rank?` ${g.rank}位`:""}`:(g.course||""))];
+    : [esPosTag(g.pos), tyPLink(g), g.star??"-", escHtml(tyCourse(g))];
   return `<div class="es-st-wrap"><table class="t-tbl"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${L.map(g=>`<tr>${row(g).map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 const esPosTag = p => p ? `<span class="es-pos sm ${esPosCls(p)}">${escHtml(p)}</span>` : "";
