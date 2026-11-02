@@ -874,7 +874,13 @@ img{display:block;max-width:100%;}
 .nv-dlist-h{font-size:2.3cqw;font-weight:900;letter-spacing:.4em;color:var(--sky-d);padding-bottom:.8cqw;border-bottom:.2cqw solid rgba(138,100,20,.35);margin-bottom:.4cqw;}
 .nv-dlist-r{display:flex;align-items:center;gap:1.6cqw;height:5.4cqw;border-bottom:.15cqw solid rgba(15,35,80,.1);}
 .nv-dlist-r:last-child{border-bottom:0;}
-.nv-dlist-r .rk{flex:0 0 7cqw;text-align:center;font-size:2.2cqw;font-weight:900;color:#fff;background:var(--navy);padding:.4cqw 0;}
+.nv-dlist-r .nvr{flex:0 0 7cqw;text-align:center;font-size:2.2cqw;font-weight:900;color:#fff;background:var(--navy);padding:.4cqw 0;}
 .nv-dlist-r b{flex:1;min-width:0;font-size:2.9cqw;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.nv-dlist-r .tm{flex:0 0 auto;font-size:2.3cqw;font-weight:800;color:var(--ink2);}
+.nv-dlist-r .nvt{flex:0 0 auto;font-size:2.3cqw;font-weight:800;color:var(--ink2);}
 .nv-dlist-m{text-align:right;font-size:2.2cqw;color:var(--ink2);padding-top:.6cqw;}
+/* 名前は省略しない（長い名前は文字を小さく） */
+.nv-dlist{width:48cqw;}
+.nv-dlist-r b{overflow:visible;text-overflow:clip;}
+.nv-dlist-r b.sm{font-size:2.5cqw;}
+.nv-dlist-r b.xs{font-size:2.1cqw;}
+.nv-dlist-r .nvt{font-size:2.1cqw;}

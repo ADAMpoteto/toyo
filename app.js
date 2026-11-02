@@ -1511,7 +1511,7 @@ function tyVisual(n){
     return `<div class="nv t dr dr2"><div class="nv-kind">DRAFT<small>${n.y}年度 ドラフト会議</small></div>
       <div class="nv-gbig">${n.L.length}<small>名が指名</small></div>
       ${r?`<div class="nv-gsub">${r}位指名 ${same}名</div>`:""}
-      <div class="nv-dlist"><div class="nv-dlist-h">指名選手</div>${L.map(g=>`<div class="nv-dlist-r"><span class="rk">${g.rank?`${escHtml(g.rank)}位`:"－"}</span><b>${escHtml(g.name)}</b><span class="tm">${escHtml(g.team)}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-dlist-m">ほか${n.L.length-L.length}名</div>`:""}</div>
+      <div class="nv-dlist"><div class="nv-dlist-h">指名選手</div>${L.map(g=>`<div class="nv-dlist-r"><span class="nvr">${g.rank?`${escHtml(g.rank)}位`:"－"}</span><b${(()=>{ const n=String(g.name).replace(/\s/g,"").length; return n>=8?' class="xs"':n>=6?' class="sm"':""; })()}>${escHtml(g.name)}</b><span class="nvt">${escHtml(g.team)}</span></div>`).join("")}${n.L.length>L.length?`<div class="nv-dlist-m">ほか${n.L.length-L.length}名</div>`:""}</div>
       <div class="nv-date">${n.date}</div>${mark}</div>`;
   }
   /* 入学式・ドラフトは明るいカード */
