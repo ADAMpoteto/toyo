@@ -884,3 +884,8 @@ img{display:block;max-width:100%;}
 .nv-dlist-r b.sm{font-size:2.5cqw;}
 .nv-dlist-r b.xs{font-size:2.1cqw;}
 .nv-dlist-r .nvt{font-size:2.1cqw;}
+/* ベスト9：複数ポジの選手は守れる位置の色を並べたバッジ */
+.es-pos.lg.multi{color:#fff !important;text-shadow:0 0 3px rgba(0,0,0,.55),0 1px 1px rgba(0,0,0,.5);}
+.es-tag.sub{background:var(--navy);color:var(--gold-l);border-color:var(--navy);}
+.nv-dl{max-width:54cqw;} .nv-dl dd{overflow-wrap:anywhere;}
+.nv.t:not(.dr2) .nv-name{top:23.5cqw;} .nv.t:not(.dr2) .nv-dl{top:32.5cqw;row-gap:.2cqw;}

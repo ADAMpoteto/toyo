@@ -1003,6 +1003,45 @@ function esPick(pool, key, asc){
     if(c) used.add(c); return {p, g:c||null};
   });
 }
+/* 守れる位置（卒業時の守備位置＋守備適性が入っている位置）。順番はメイン→投捕一二三遊外 */
+function esPosList(g){
+  const mp=/^[左中右]$/.test(g.pos)?"外":g.pos, L=mp?[mp]:[];
+  ["投","捕","一","二","三","遊","外"].forEach(p=>{ if(g.def && g.def[p]!=null && !L.includes(p)) L.push(p); });
+  return L;
+}
+/* 複数ポジの選手は、守れる位置の色を並べたバッジにする（例：捕・一・外 → 青・黄・緑） */
+const ES_POS_VAR={"p-pit":"--pos-pit","p-cat":"--pos-cat","p-inf":"--pos-inf","p-of":"--pos-of"};
+function esPosBadge(slot, g){
+  const L=g?esPosList(g):[];
+  if(L.length<2) return `<span class="es-pos lg ${esPosCls(slot)}">${slot}</span>`;
+  const c=[...new Set(L.map(p=>`var(${ES_POS_VAR[esPosCls(p)]||"--pos-etc"})`))];
+  const bg = c.length<2 ? c[0] : `linear-gradient(135deg,${c.map((x,i)=>`${x} ${i*100/c.length}% ${(i+1)*100/c.length}%`).join(",")})`;
+  return `<span class="es-pos lg multi" style="background:${bg}" title="守れる位置：${L.join("・")}">${slot}</span>`;
+}
+/* プロ以外：サブポジの適性も使って9人を埋める。
+   できるだけ多くの位置を埋め、その中で★の合計が一番高くなる組み合わせ（同じならメインの位置を優先）を選ぶ */
+function esPickSub(pool){
+  const P=pool.filter(g=>g.star!=null && esPosList(g).length);
+  const n=ES_B9_SLOTS.length, m=Math.max(P.length, n);
+  const W=ES_B9_SLOTS.map(p=>Array.from({length:m},(_,j)=>{ const g=P[j]; if(!g) return 0;
+    const L=esPosList(g); if(!L.includes(p)) return 0; return 10000 + g.star*10 - (L[0]===p?0:1); }));
+  const col=esHungarianMax(W, n, m);
+  return ES_B9_SLOTS.map((p,i)=>{ const g=col[i]>=0 && W[i][col[i]]>0 ? P[col[i]] : null; return {p, g, sub: !!g && esPosList(g)[0]!==p}; });
+}
+/* 割り当て問題（行＝位置、列＝選手、重みの合計を最大に）。n≦m */
+function esHungarianMax(W, n, m){
+  const INF=1e18, mx=Math.max(0,...W.flat()), u=Array(n+1).fill(0), v=Array(m+1).fill(0), p=Array(m+1).fill(0), way=Array(m+1).fill(0);
+  const C=(i,j)=>mx-W[i-1][j-1];
+  for(let i=1;i<=n;i++){
+    p[0]=i; let j0=0; const minv=Array(m+1).fill(INF), used=Array(m+1).fill(false);
+    do{ used[j0]=true; const i0=p[j0]; let d=INF, j1=0;
+      for(let j=1;j<=m;j++) if(!used[j]){ const cur=C(i0,j)-u[i0]-v[j]; if(cur<minv[j]){ minv[j]=cur; way[j]=j0; } if(minv[j]<d){ d=minv[j]; j1=j; } }
+      for(let j=0;j<=m;j++){ if(used[j]){ u[p[j]]+=d; v[j]-=d; } else minv[j]-=d; }
+      j0=j1; } while(p[j0]!==0);
+    do{ const j1=way[j0]; p[j0]=p[j1]; j0=j1; } while(j0);
+  }
+  const res=Array(n).fill(-1); for(let j=1;j<=m;j++) if(p[j]) res[p[j]-1]=j-1; return res;
+}
 function esRenderB9(){
   document.getElementById("es-b9-team").hidden = ES.b9!=="team";
   let picks, note="", val;
@@ -1016,10 +1055,10 @@ function esRenderB9(){
   } else {
     const pool = ES.b9==="team" ? ES.grads.filter(g=>g.team===ES.team)
                : ES.b9==="amateur" ? ES.grads.filter(g=>!g.pro) : ES.grads;
-    picks=esPick(pool, g=>g.star);
+    picks = ES.b9==="amateur" ? esPickSub(pool) : esPick(pool, g=>g.star);
     val=x=>`<b>${x.g.star}</b><small>★</small>`;
     note = ES.b9==="team" ? "その球団に進んだ卒業生の中で、卒業時の★が一番高い選手（守備は卒業時）。"
-         : ES.b9==="amateur" ? "プロ野球選手にならなかった卒業生の中で、卒業時の★が一番高い選手（守備は卒業時）。"
+         : ES.b9==="amateur" ? "プロ野球選手にならなかった卒業生の中で、サブポジの適性がある位置にも入れて、できるだけ9つの位置を埋め、★の合計が一番高くなる9人を選ぶ。「サブ」はサブポジで入った選手。"
          : "卒業時の★が一番高い選手（守備は卒業時）。";
   }
   /* 1人もいないときは「該当なし」を9行並べず、ひとことだけ */
@@ -1029,9 +1068,9 @@ function esRenderB9(){
   }
   document.getElementById("es-b9").innerHTML=`<div class="es-b9">${picks.map(x=>{
     const inner=`
-      <span class="es-pos lg ${esPosCls(x.p)}">${x.p}</span>
-      <span class="es-b9-main">${x.g?`<span class="es-b9-name">${escHtml(x.g.name)}${esTags(x.g)}</span>
-        <span class="es-b9-meta">${escHtml(esGradMeta(x.g))}</span>`:`<span class="es-b9-meta">該当なし</span>`}</span>
+      ${esPosBadge(x.p, x.g)}
+      <span class="es-b9-main">${x.g?`<span class="es-b9-name">${escHtml(x.g.name)}${x.sub?`<span class="es-tag sub">サブ ${escHtml(esPosList(x.g)[0])}→${x.p}</span>`:""}${esTags(x.g)}</span>
+        <span class="es-b9-meta">${escHtml([esPosList(x.g).length>1?`守備 ${esPosList(x.g).join("・")}`:"", esGradMeta(x.g)].filter(Boolean).join("　"))}</span>`:`<span class="es-b9-meta">該当なし</span>`}</span>
       <span class="es-b9-val">${x.g?val(x):""}</span>`;
     return x.g ? esPl("es-b9-row", inner, x.g) : `<div class="es-b9-row empty">${inner}</div>`;
   }).join("")}</div>`;
@@ -1522,9 +1561,10 @@ function tyVisual(n){
     : [["新入生", `${n.L.length}名`], ["注目", `${top.name}（${top.pos0||top.pos||""}）`], ["スカウト", `${n.L.filter(g=>g.scout).length}名`]];
   const sur=String(top.name).split(/[\s　]+/)[0];
   return `<div class="nv t ${n.cat==="DRAFT"?"dr":""}"><div class="nv-kind">${kind}</div>
-    <div class="nv-name">${escHtml(n.cat==="DRAFT"&&n.L.length>1?`${n.L.length}名が指名`:top.name)}</div>
+    ${(()=>{ const t=n.cat==="DRAFT"&&n.L.length>1?`${n.L.length}名が指名`:top.name, len=String(t).replace(/[\s　]/g,"").length+0.5*(String(t).match(/[\s　]/g)||[]).length;
+      return `<div class="nv-name" style="font-size:${Math.min(6, 50/len).toFixed(2)}cqw">${escHtml(t)}</div>`; })()}
     <dl class="nv-dl">${dl.map(([k,v])=>`<dt>${k}</dt><dd>${escHtml(v||"-")}</dd>`).join("")}</dl>
-    <div class="nv-photo"><div class="face ph">${escHtml(sur)}</div></div><div class="nv-date">${n.date}</div>${mark}</div>`;
+    <div class="nv-photo"><div class="face ph" style="font-size:${Math.min(9, 25/Math.max(1,sur.length)).toFixed(2)}cqw">${escHtml(sur)}</div></div><div class="nv-date">${n.date}</div>${mark}</div>`;
 }
 
 /* ---------- ニュースの本文 ---------- */
