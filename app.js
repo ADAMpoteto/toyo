@@ -1558,10 +1558,10 @@ function tyVisual(n){
   const kind = n.cat==="DRAFT" ? `DRAFT<small>ドラフト会議</small>` : `WELCOME<small>${n.y}年度 入学式</small>`;
   const dl = n.cat==="DRAFT"
     ? [["TEAM", top.team], ["RANK", top.rank?`${top.rank}位`:"-"], ["POS", top.pos]]
-    : [["新入生", `${n.L.length}名`], ["注目", `${top.name}（${top.pos0||top.pos||""}）`], ["スカウト", `${n.L.filter(g=>g.scout).length}名`]];
+    : [["注目", `${top.name}（${top.pos0||top.pos||""}）`], ["入学時★", top.star0!=null?`${top.star0}`:""], ["スカウト", `${n.L.filter(g=>g.scout).length}名`]].filter(([,v])=>v);
   const sur=String(top.name).split(/[\s　]+/)[0];
   return `<div class="nv t ${n.cat==="DRAFT"?"dr":""}"><div class="nv-kind">${kind}</div>
-    ${(()=>{ const t=n.cat==="DRAFT"&&n.L.length>1?`${n.L.length}名が指名`:top.name, len=String(t).replace(/[\s　]/g,"").length+0.5*(String(t).match(/[\s　]/g)||[]).length;
+    ${(()=>{ const t=n.cat==="DRAFT" ? (n.L.length>1?`${n.L.length}名が指名`:top.name) : `新入生${n.L.length}名が入部`, len=String(t).replace(/[\s　]/g,"").length+0.5*(String(t).match(/[\s　]/g)||[]).length;
       return `<div class="nv-name" style="font-size:${Math.min(6, 50/len).toFixed(2)}cqw">${escHtml(t)}</div>`; })()}
     <dl class="nv-dl">${dl.map(([k,v])=>`<dt>${k}</dt><dd>${escHtml(v||"-")}</dd>`).join("")}</dl>
     <div class="nv-photo"><div class="face ph" style="font-size:${Math.min(9, 25/Math.max(1,sur.length)).toFixed(2)}cqw">${escHtml(sur)}</div></div><div class="nv-date">${n.date}</div>${mark}</div>`;
